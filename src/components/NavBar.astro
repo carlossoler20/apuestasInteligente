@@ -2,13 +2,13 @@
 import { Image } from 'astro:assets';
 import logo from '../assets/logof.png';
 ---
-
+<header>
 <nav class="bg-gray-800 text-white sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
             <div class="flex-shrink-0">
-                <Image src={logo} alt="Logo" class="h-10 w-auto" />
+                <!--<Image src={logo} alt="Logo" class="h-10 w-auto" /> --><span class="text-xl font-bold">Apuestas Inteligente</span>
             </div>
 
             <!-- Menu Desktop -->
@@ -44,7 +44,7 @@ import logo from '../assets/logof.png';
         </ul>
     </div>
 </nav>
-
+</header>
 <script>
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
