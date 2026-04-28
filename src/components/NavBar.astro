@@ -1,0 +1,62 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logof.png';
+---
+
+<nav class="bg-gray-800 text-white sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div class="flex-shrink-0">
+                <Image src={logo} alt="Logo" class="h-10 w-auto" />
+            </div>
+
+            <!-- Menu Desktop -->
+            <ul class="hidden md:flex gap-8">
+                <li><a href="/" class="hover:text-blue-400 transition">Inicio</a></li>
+                <li><a href="/picks" class="hover:text-blue-400 transition">Pronósticos</a></li>
+                <li><a href="/results" class="hover:text-blue-400 transition">Resultados</a></li>
+                <li><a href="/blog" class="hover:text-blue-400 transition">Blog</a></li>
+                <li><a href="/contact" class="hover:text-blue-400 transition">Contacto</a></li>
+            </ul>
+
+            <!-- Hamburger Button Mobile -->
+            <button 
+                id="hamburger" 
+                class="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-700 focus:outline-none"
+                aria-label="Toggle menu"
+            >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Menu Mobile -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-700">
+        <ul class="px-2 pt-2 pb-3 space-y-1">
+            <li><a href="/" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Inicio</a></li>
+            <li><a href="/picks" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Pronósticos</a></li>
+            <li><a href="/results" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Resultados</a></li>
+            <li><a href="/blog" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Blog</a></li>
+            <li><a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Contacto</a></li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger?.addEventListener('click', () => {
+        mobileMenu?.classList.toggle('hidden');
+    });
+
+    // Cerrar el menú al hacer clic en un enlace
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu?.classList.add('hidden');
+        });
+    });
+</script>
