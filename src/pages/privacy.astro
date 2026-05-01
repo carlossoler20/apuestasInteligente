@@ -1,0 +1,302 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<style>
+  .privacy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .privacy-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .privacy-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+  }
+
+  .update-date {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 4px;
+  }
+
+  .section h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+
+  .section ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .section li {
+    margin-bottom: 0.8rem;
+    color: #555;
+  }
+
+  .intro-section {
+    background: #e8f4f8;
+    border-left-color: #17a2b8;
+    margin-bottom: 2rem;
+  }
+
+  .contact-section {
+    background: #e3f2fd;
+    border-left-color: #2196f3;
+  }
+
+  .security-section {
+    background: #f3e5f5;
+    border-left-color: #9c27b0;
+  }
+
+  .rights-section {
+    background: #fff3e0;
+    border-left-color: #ff9800;
+  }
+
+  .final-section {
+    background: #d4edda;
+    border-left-color: #28a745;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .section p {
+    margin: 0.8rem 0;
+    color: #555;
+  }
+
+  .section strong {
+    color: #333;
+  }
+
+  .table-of-contents {
+    background: #f0f0f0;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+  }
+
+  .table-of-contents h3 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .table-of-contents ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .table-of-contents li {
+    padding: 0.4rem 0;
+  }
+
+  .info-box {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+  }
+
+  .info-box p {
+    margin: 0;
+    color: #555;
+  }
+
+  a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<Layout title="Política de Privacidad">
+    <br>
+  <div class="privacy-container">
+    <div class="privacy-header">
+      <h1>🔐 Política de Privacidad</h1>
+      <p class="update-date">Última actualización: Abril 2026</p>
+    </div>
+
+    <div class="section intro-section">
+      <p>
+        En <strong>apuestasinteligentes.com</strong>, nos comprometemos a proteger la privacidad de los usuarios. 
+        Esta Política describe cómo recopilamos, usamos y protegemos la información personal.
+      </p>
+    </div>
+
+    <!-- Índice de contenidos -->
+    <div class="table-of-contents">
+      <h3>📑 Índice de Contenidos</h3>
+      <ul>
+        <li>1. Responsable del Tratamiento</li>
+        <li>2. Datos que Recopilamos</li>
+        <li>3. Finalidad del Tratamiento</li>
+        <li>4. Base Legal</li>
+        <li>5. Conservación de los Datos</li>
+        <li>6. Derechos del Usuario</li>
+        <li>7. Seguridad de la Información</li>
+        <li>8. Uso de Herramientas de Terceros</li>
+        <li>9. Transferencia de Datos</li>
+        <li>10. Modificaciones</li>
+        <li>11. Aceptación</li>
+      </ul>
+    </div>
+
+    <!-- Sección 1 -->
+    <div class="section contact-section">
+      <h2>1. 👤 Responsable del Tratamiento</h2>
+      <div class="info-box">
+        <p><strong>Responsable:</strong> Apuestas Inteligentes</p>
+        <p><strong>📧 Correo:</strong> <a href="mailto:contacto@apuestasinteligentes.com">contacto@apuestasinteligentes.com</a></p>
+        <p><strong>🌐 Sitio web:</strong> <a href="https://apuestasinteligentes.com">https://apuestasinteligentes.com</a></p>
+      </div>
+    </div>
+
+    <!-- Sección 2 -->
+    <div class="section">
+      <h2>2. 📊 Datos que Recopilamos</h2>
+      <p>Podemos recopilar los siguientes tipos de datos:</p>
+      <ul>
+        <li>
+          <strong>📋 Datos de identificación:</strong> nombre, correo electrónico 
+          <em>(cuando el usuario los proporciona voluntariamente)</em>
+        </li>
+        <li>
+          <strong>👆 Datos de uso:</strong> páginas visitadas, tiempo de navegación, clics
+        </li>
+        <li>
+          <strong>💻 Datos técnicos:</strong> dirección IP, navegador, dispositivo
+        </li>
+      </ul>
+    </div>
+
+    <!-- Sección 3 -->
+    <div class="section">
+      <h2>3. 🎯 Finalidad del Tratamiento</h2>
+      <p>Utilizamos los datos para:</p>
+      <ul>
+        <li>Gestionar consultas y contacto con el usuario</li>
+        <li>Mejorar la experiencia de navegación</li>
+        <li>Analizar el uso del sitio web</li>
+        <li>Enviar comunicaciones (si el usuario lo autoriza)</li>
+      </ul>
+    </div>
+
+    <!-- Sección 4 -->
+    <div class="section">
+      <h2>4. ⚖️ Base Legal</h2>
+      <p>El tratamiento de datos se realiza con base en:</p>
+      <ul>
+        <li><strong>✓ Consentimiento del usuario</strong></li>
+        <li><strong>✓ Interés legítimo</strong> para mejorar el servicio</li>
+      </ul>
+    </div>
+
+    <!-- Sección 5 -->
+    <div class="section">
+      <h2>5. ⏱️ Conservación de los Datos</h2>
+      <p>
+        Los datos se conservarán <strong>únicamente durante el tiempo necesario</strong> para cumplir con las 
+        finalidades descritas o hasta que el usuario solicite su eliminación.
+      </p>
+    </div>
+
+    <!-- Sección 6 -->
+    <div class="section rights-section">
+      <h2>6. ✅ Derechos del Usuario</h2>
+      <p>El usuario tiene derecho a:</p>
+      <ul>
+        <li>✓ <strong>Acceder</strong> a sus datos personales</li>
+        <li>✓ <strong>Rectificar</strong> información incorrecta</li>
+        <li>✓ <strong>Solicitar la eliminación</strong> de sus datos</li>
+        <li>✓ <strong>Revocar el consentimiento</strong> en cualquier momento</li>
+      </ul>
+      <div class="info-box" style="margin-top: 1.5rem;">
+        <p>
+          <strong>Para ejercer estos derechos, puede escribir a:</strong><br>
+          📧 <a href="mailto:contacto@apuestasinteligentes.com">contacto@apuestasinteligentes.com</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Sección 7 -->
+    <div class="section security-section">
+      <h2>7. 🛡️ Seguridad de la Información</h2>
+      <p>
+        Adoptamos <strong>medidas técnicas y organizativas</strong> para proteger los datos contra:
+      </p>
+      <ul>
+        <li>Accesos no autorizados</li>
+        <li>Pérdida de datos</li>
+        <li>Alteración de información</li>
+      </ul>
+    </div>
+
+    <!-- Sección 8 -->
+    <div class="section">
+      <h2>8. 🔍 Uso de Herramientas de Terceros</h2>
+      <p>
+        Este sitio puede utilizar herramientas de análisis como <strong>Google Analytics</strong> para 
+        entender el comportamiento de los usuarios.
+      </p>
+      <p style="color: #666; font-style: italic;">
+        Estas herramientas pueden recopilar información de forma <strong>anónima</strong>.
+      </p>
+    </div>
+
+    <!-- Sección 9 -->
+    <div class="section">
+      <h2>9. 🚫 Transferencia de Datos</h2>
+      <p>
+        <strong>No vendemos ni compartimos</strong> datos personales con terceros, salvo:
+      </p>
+      <ul>
+        <li>Obligación legal</li>
+        <li>Servicios necesarios para el funcionamiento del sitio</li>
+      </ul>
+    </div>
+
+    <!-- Sección 10 -->
+    <div class="section">
+      <h2>10. 🔄 Modificaciones</h2>
+      <p>
+        Nos reservamos el derecho de modificar esta política en cualquier momento. 
+        <strong>Los cambios serán publicados en esta misma página</strong>.
+      </p>
+    </div>
+
+    <!-- Sección 11 -->
+    <div class="section final-section">
+      <h2>11. 📝 Aceptación</h2>
+      <p>
+        El uso del sitio implica la <strong>aceptación de esta Política de Privacidad</strong>.
+      </p>
+    </div>
+  </div>
+</Layout>
+</Layout>

@@ -1,0 +1,195 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<style>
+  .cookies-container {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .cookies-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .cookies-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+  }
+
+  .update-date {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-left: 4px solid #667eea;
+    border-radius: 4px;
+  }
+
+  .section h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+  }
+
+  .section ul,
+  .section ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .section li {
+    margin-bottom: 0.8rem;
+    color: #555;
+  }
+
+  .intro-section {
+    background: #e8f4f8;
+    border-left-color: #17a2b8;
+  }
+
+  .types-section {
+    background: #fff7e6;
+    border-left-color: #ff9800;
+  }
+
+  .consent-section {
+    background: #e8f5e9;
+    border-left-color: #4caf50;
+  }
+
+  .third-party-section {
+    background: #f3e5f5;
+    border-left-color: #9c27b0;
+  }
+
+  .table-of-contents {
+    background: #f0f0f0;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+  }
+
+  .table-of-contents h3 {
+    margin-top: 0;
+    color: #333;
+  }
+
+  .table-of-contents ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .table-of-contents li {
+    padding: 0.4rem 0;
+  }
+
+  a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<Layout title="Política de Cookies">
+  <br>
+  <div class="cookies-container">
+    <div class="cookies-header">
+      <h1>🍪 Política de Cookies</h1>
+      <p class="update-date">Última actualización: Abril 2026</p>
+    </div>
+
+    <div class="section intro-section">
+      <p>
+        En <strong>apuestasinteligentes.com</strong>, utilizamos cookies para mejorar la experiencia del usuario,
+        personalizar funciones y entender cómo se utiliza el sitio.
+      </p>
+    </div>
+
+    <div class="table-of-contents">
+      <h3>📑 Índice de contenidos</h3>
+      <ul>
+        <li>1. ¿Qué son las cookies?</li>
+        <li>2. Tipos de cookies que utilizamos</li>
+        <li>3. Finalidad de las cookies</li>
+        <li>4. Gestión de cookies</li>
+        <li>5. Cookies de terceros</li>
+        <li>6. Consentimiento</li>
+        <li>7. Modificaciones</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>1. 🟢 ¿Qué son las cookies?</h2>
+      <p>
+        Las cookies son pequeños archivos que se almacenan en el dispositivo del usuario al visitar un sitio web.
+        Nos ayudan a recordar preferencias y a mejorar el funcionamiento del sitio.
+      </p>
+    </div>
+
+    <div class="section types-section">
+      <h2>2. 🔹 Tipos de cookies que utilizamos</h2>
+      <h3>Cookies técnicas</h3>
+      <p>Permiten el funcionamiento básico del sitio y mejoras de navegación.</p>
+      <h3>Cookies de análisis</h3>
+      <p>
+        Nos ayudan a entender cómo interactúan los usuarios con el sitio, por ejemplo mediante herramientas
+        como Google Analytics.
+      </p>
+      <h3>Cookies de personalización</h3>
+      <p>Permiten recordar preferencias del usuario y ofrecer una experiencia más personalizada.</p>
+    </div>
+
+    <div class="section">
+      <h2>3. 🎯 Finalidad de las cookies</h2>
+      <ul>
+        <li>Mejorar la navegación</li>
+        <li>Analizar el tráfico</li>
+        <li>Optimizar el contenido</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>4. ⚙️ Gestión de cookies</h2>
+      <p>
+        El usuario puede aceptar, rechazar o configurar el uso de cookies desde su navegador. En cualquier momento puede eliminar
+        las cookies almacenadas desde la configuración de su navegador.
+      </p>
+    </div>
+
+    <div class="section third-party-section">
+      <h2>5. 🌐 Cookies de terceros</h2>
+      <p>
+        Algunas cookies pueden ser gestionadas por servicios externos, que cuentan con sus propias políticas de privacidad.
+      </p>
+    </div>
+
+    <div class="section consent-section">
+      <h2>6. ✅ Consentimiento</h2>
+      <p>
+        Al navegar en este sitio, el usuario acepta el uso de cookies conforme a esta política.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>7. 🔄 Modificaciones</h2>
+      <p>
+        Nos reservamos el derecho de modificar esta política en cualquier momento. Los cambios serán publicados en esta misma página.
+      </p>
+    </div>
+  </div>
+</Layout>
