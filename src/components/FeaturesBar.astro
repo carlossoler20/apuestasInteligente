@@ -43,16 +43,16 @@ const icons: Record<Feature['icon'], string> = {
 };
 ---
 
-<section class="border border-green-950 rounded-xl bg-[#0f2318] px-8 py-6">
+<section class="border border-[#0B3D2E] rounded-xl bg-[#121212] px-8 py-6">
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
     {features.map((feature) => (
       <div class="flex items-start gap-4">
 
         <!-- Ícono -->
-        <div class="shrink-0 w-11 h-11 rounded-lg border border-green-950 bg-[#0B1A10] flex items-center justify-center">
+        <div class="shrink-0 w-11 h-11 rounded-lg border border-[#0B3D2E] bg-[#0B3D2E] flex items-center justify-center">
           <svg
-            class="w-5 h-5 text-green-400"
+            class="w-5 h-5 text-white"
             fill="none"
             stroke="currentColor"
             stroke-width="1.8"
@@ -65,7 +65,7 @@ const icons: Record<Feature['icon'], string> = {
         <!-- Texto -->
         <div>
           <p class="text-white text-sm font-semibold mb-1">{feature.title}</p>
-          <p class="text-gray-500 text-xs leading-relaxed">{feature.description}</p>
+          <p class="text-gray-400 text-xs leading-relaxed">{feature.description}</p>
         </div>
 
       </div>

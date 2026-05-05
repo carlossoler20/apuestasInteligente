@@ -25,17 +25,17 @@ const {
   href = '#',
 } = Astro.props;
 
-const badgeColor = variant === 'SECUNDARIO' ? 'text-blue-400' : 'text-purple-400';
+const badgeColor = variant === 'SECUNDARIO' ? 'text-[#0B3D2E]' : 'text-[#0B3D2E]';
 
 const confianzaMap = {
-  ALTA:  { text: 'text-green-400', bars: ['h-1.5', 'h-2.5', 'h-3.5'], color: 'bg-green-400' },
+  ALTA:  { text: 'text-[#0B3D2E]', bars: ['h-1.5', 'h-2.5', 'h-3.5'], color: 'bg-[#0B3D2E]' },
   MEDIA: { text: 'text-amber-400', bars: ['h-1.5', 'h-2.5', 'h-1.5'], color: 'bg-amber-400' },
   BAJA:  { text: 'text-red-400',   bars: ['h-1.5', 'h-1',   'h-0.5'], color: 'bg-red-400'   },
 };
 const conf = confianza ? confianzaMap[confianza] : null;
 ---
 
-<div class="rounded-xl border border-green-950 bg-[#0f2318] p-4 flex flex-col justify-between">
+<div class="rounded-xl border border-[#0B3D2E] bg-[#1E1E1E] p-4 flex flex-col justify-between">
 
   <!-- Badge -->
   <p class={`text-xs font-bold mb-3 ${badgeColor}`}>{variant}</p>
@@ -49,19 +49,19 @@ const conf = confianza ? confianzaMap[confianza] : null;
             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
             style={`background: ${homeColor}`}
           >{homeCode}</div>
-          <span class="text-gray-500 text-xs">vs</span>
+          <span class="text-gray-400 text-xs">vs</span>
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
             style={`background: ${awayColor}`}
           >{awayCode}</div>
           <div class="ml-1">
             <p class="text-white text-sm font-semibold">{betType}</p>
-            <p class="text-gray-500 text-xs">Tipo de apuesta</p>
+            <p class="text-gray-400 text-xs">Tipo de apuesta</p>
           </div>
         </div>
         <div class="text-right">
           <p class="text-gray-500 text-xs">CUOTA</p>
-          <p class="text-green-400 text-2xl font-black">{cuota.toFixed(2)}</p>
+          <p class="text-[#0B3D2E] text-2xl font-black">{cuota.toFixed(2)}</p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ const conf = confianza ? confianzaMap[confianza] : null;
               ))}
             </span>
           </div>
-          <a href={href} class="text-green-400 text-xs hover:text-green-300 transition-colors">
+          <a href={href} class="text-[#0B3D2E] text-xs hover:text-[#0A2D24] transition-colors">
             Ver análisis →
           </a>
         </div>
@@ -91,7 +91,7 @@ const conf = confianza ? confianzaMap[confianza] : null;
           class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
           style={`background: ${homeColor}`}
         >{homeCode}</div>
-        <span class="text-gray-500 text-xs">vs</span>
+        <span class="text-gray-400 text-xs">vs</span>
         <div
           class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
           style={`background: ${awayColor}`}
@@ -99,14 +99,14 @@ const conf = confianza ? confianzaMap[confianza] : null;
       </div>
 
       <p class="text-white text-sm font-semibold">{betType}</p>
-      <p class="text-gray-600 text-xs mt-1">{league} · {date} · {time}</p>
+      <p class="text-gray-500 text-xs mt-1">{league} · {date} · {time}</p>
 
       <div class="flex items-center justify-between mt-3">
         <div>
           <p class="text-gray-500 text-xs">CUOTA</p>
-          <p class="text-green-400 text-2xl font-black">{cuota.toFixed(2)}</p>
+          <p class="text-[#0B3D2E] text-2xl font-black">{cuota.toFixed(2)}</p>
         </div>
-        <a href={href} class="text-green-400 text-xs hover:text-green-300 transition-colors">
+        <a href={href} class="text-[#0B3D2E] text-xs hover:text-[#0A2D24] transition-colors">
           Ver análisis →
         </a>
       </div>

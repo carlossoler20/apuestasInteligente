@@ -3,27 +3,27 @@ import { Image } from 'astro:assets';
 import logo from '../assets/logof.png';
 ---
 <header>
-<nav class="bg-gray-800 text-white sticky top-0 z-50">
+<nav class="bg-[#1E1E1E] text-white sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
             <div class="flex-shrink-0">
-                <!--<Image src={logo} alt="Logo" class="h-10 w-auto" /> --><span class="text-xl font-bold">Apuestas Inteligente</span>
+                <!--<Image src={logo} alt="Logo" class="h-10 w-auto" /> --><span class="text-xl font-bold text-[#0B3D2E]">Apuestas Inteligente</span>
             </div>
 
             <!-- Menu Desktop -->
             <ul class="hidden md:flex gap-8">
-                <li><a href="/" class="hover:text-blue-400 transition">Inicio</a></li>
-                <li><a href="/picks" class="hover:text-blue-400 transition">Pronósticos</a></li>
-                <li><a href="/results" class="hover:text-blue-400 transition">Resultados</a></li>
-                <li><a href="/blog" class="hover:text-blue-400 transition">Blog</a></li>
-                <li><a href="/contact" class="hover:text-blue-400 transition">Contacto</a></li>
+                <li><a href="/" class="hover:text-[#0B3D2E] transition">Inicio</a></li>
+                <li><a href="/picks" class="hover:text-[#0B3D2E] transition">Pronósticos</a></li>
+                <li><a href="/results" class="hover:text-[#0B3D2E] transition">Resultados</a></li>
+                <li><a href="/blog" class="hover:text-[#0B3D2E] transition">Blog</a></li>
+                <li><a href="/contact" class="hover:text-[#0B3D2E] transition">Contacto</a></li>
             </ul>
 
             <!-- Hamburger Button Mobile -->
             <button 
                 id="hamburger" 
-                class="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-700 focus:outline-none"
+                class="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-[#0B3D2E] focus:outline-none transition"
                 aria-label="Toggle menu"
             >
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,13 +34,13 @@ import logo from '../assets/logof.png';
     </div>
 
     <!-- Menu Mobile -->
-    <div id="mobile-menu" class="hidden md:hidden bg-gray-700">
+    <div id="mobile-menu" class="hidden md:hidden bg-[#121212]">
         <ul class="px-2 pt-2 pb-3 space-y-1">
-            <li><a href="/" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Inicio</a></li>
-            <li><a href="/picks" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Pronósticos</a></li>
-            <li><a href="/results" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Resultados</a></li>
-            <li><a href="/blog" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Blog</a></li>
-            <li><a href="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-600 transition">Contacto</a></li>
+            <li><a href="/" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Inicio</a></li>
+            <li><a href="/picks" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Pronósticos</a></li>
+            <li><a href="/results" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Resultados</a></li>
+            <li><a href="/blog" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Blog</a></li>
+            <li><a href="/contact" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Contacto</a></li>
         </ul>
     </div>
 </nav>

@@ -24,13 +24,13 @@ const {
 } = Astro.props;
 
 const confianzaStyle = {
-  ALTA:  { text: 'text-green-400',  bars: ['h-1.5', 'h-2.5', 'h-3.5'], barColor: 'bg-green-400' },
+  ALTA:  { text: 'text-[#0B3D2E]',  bars: ['h-1.5', 'h-2.5', 'h-3.5'], barColor: 'bg-[#0B3D2E]' },
   MEDIA: { text: 'text-amber-400',  bars: ['h-1.5', 'h-2.5', 'h-1.5'], barColor: 'bg-amber-400' },
   BAJA:  { text: 'text-red-400',    bars: ['h-1.5', 'h-1',   'h-0.5'], barColor: 'bg-red-400'   },
 }[confianza];
 ---
 
-<div class="rounded-xl border border-green-950 bg-[#0f2318] p-5 mb-3">
+<div class="rounded-xl border border-[#0B3D2E] bg-[#1E1E1E] p-5 mb-3">
   <!-- Badge -->
   <p class="text-amber-400 text-xs font-bold mb-3">★ PRONÓSTICO DESTACADO</p>
 
@@ -55,17 +55,17 @@ const confianzaStyle = {
       </div>
       <div>
         <p class="text-white text-sm font-semibold">{homeTeam} vs {awayTeam}</p>
-        <p class="text-gray-500 text-xs mt-0.5">{league} · {date} · {time}</p>
+        <p class="text-gray-400 text-xs mt-0.5">{league} · {date} · {time}</p>
       </div>
     </div>
 
     <!-- Divisor vertical -->
-    <div class="hidden md:block w-px self-stretch bg-green-950"></div>
+    <div class="hidden md:block w-px self-stretch bg-[#0B3D2E]"></div>
 
     <!-- Tipo de apuesta + confianza -->
     <div class="flex-1">
       <p class="text-white text-xl font-bold">{betType}</p>
-      <p class="text-gray-500 text-xs uppercase tracking-wider mt-1">Tipo de apuesta</p>
+      <p class="text-gray-400 text-xs uppercase tracking-wider mt-1">Tipo de apuesta</p>
       <div class="flex items-center gap-2 mt-3">
         <span class={`text-sm font-medium ${confianzaStyle.text}`}>
           Confianza: {confianza}
@@ -79,17 +79,17 @@ const confianzaStyle = {
     </div>
 
     <!-- Divisor vertical -->
-    <div class="hidden md:block w-px self-stretch bg-green-950"></div>
+    <div class="hidden md:block w-px self-stretch bg-[#0B3D2E]"></div>
 
     <!-- Cuota + CTA -->
     <div class="flex flex-col items-center gap-3 min-w-[100px]">
       <div class="text-center">
-        <p class="text-gray-500 text-xs uppercase tracking-wider">Cuota</p>
-        <p class="text-green-400 text-4xl font-black">{cuota.toFixed(2)}</p>
+        <p class="text-gray-400 text-xs uppercase tracking-wider">Cuota</p>
+        <p class="text-[#0B3D2E] text-4xl font-black">{cuota.toFixed(2)}</p>
       </div>
       <a
         href={href}
-        class="bg-green-500 hover:bg-green-400 text-black text-sm font-semibold px-5 py-2 rounded-lg transition-colors w-full text-center whitespace-nowrap"
+        class="bg-[#0B3D2E] hover:bg-[#0A2D24] text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors w-full text-center whitespace-nowrap"
       >
         Ver análisis →
       </a>
