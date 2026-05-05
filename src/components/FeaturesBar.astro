@@ -1,0 +1,75 @@
+---
+interface Feature {
+  title: string;
+  description: string;
+  icon: 'analysis' | 'shield' | 'chart' | 'clock';
+}
+
+const features: Feature[] = [
+  {
+    icon: 'analysis',
+    title: 'Análisis profesional',
+    description: 'Estudiamos cada detalle para encontrar valor en las apuestas.',
+  },
+  {
+    icon: 'shield',
+    title: 'Gestión del riesgo',
+    description: 'No se trata de cuánto ganas, sino de cuánto conservas.',
+  },
+  {
+    icon: 'chart',
+    title: 'Disciplina',
+    description: 'Seguimos un método, evitamos la emoción.',
+  },
+  {
+    icon: 'clock',
+    title: 'Resultados transparentes',
+    description: 'Publicamos todos los resultados. Ganados, perdidos y push.',
+  },
+];
+
+const icons: Record<Feature['icon'], string> = {
+  // Lupa con reloj interior (análisis)
+  analysis: `<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v3l2 2"/>`,
+
+  // Escudo (gestión del riesgo)
+  shield: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
+
+  // Barras ascendentes (disciplina / estadísticas)
+  chart: `<path d="M18 20V10M12 20V4M6 20v-6"/>`,
+
+  // Círculo con manecillas (resultados / transparencia)
+  clock: `<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/>`,
+};
+---
+
+<section class="border border-green-950 rounded-xl bg-[#0f2318] px-8 py-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    {features.map((feature) => (
+      <div class="flex items-start gap-4">
+
+        <!-- Ícono -->
+        <div class="shrink-0 w-11 h-11 rounded-lg border border-green-950 bg-[#0B1A10] flex items-center justify-center">
+          <svg
+            class="w-5 h-5 text-green-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            set:html={icons[feature.icon]}
+          />
+        </div>
+
+        <!-- Texto -->
+        <div>
+          <p class="text-white text-sm font-semibold mb-1">{feature.title}</p>
+          <p class="text-gray-500 text-xs leading-relaxed">{feature.description}</p>
+        </div>
+
+      </div>
+    ))}
+
+  </div>
+</section>
