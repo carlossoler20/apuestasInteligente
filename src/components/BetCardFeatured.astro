@@ -30,28 +30,26 @@ const confianzaStyle = {
 }[confianza];
 ---
 
-<div class="rounded-xl border border-[#0B3D2E] bg-[#1E1E1E] p-5 mb-3">
+<div class="rounded-xl border border-[#0B3D2E] p-5 mb-3 mx-auto max-w-6xl">
   <!-- Badge -->
-  <p class="text-amber-400 text-xs font-bold mb-3">★ PRONÓSTICO DESTACADO</p>
+  <p class="text-amber-400 text-s font-bold mb-3">★ PRONÓSTICO DESTACADO</p>
 
   <div class="flex flex-col md:flex-row md:items-center gap-5">
 
     <!-- Equipos -->
     <div class="flex flex-col gap-2 min-w-[170px]">
       <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-          style={`background: ${homeColor}`}
-        >
-          {homeCode}
-        </div>
+        <img
+          src={`/assets/logosEquipos/${homeCode}.png`}
+          alt={homeTeam}
+          class="w-22 h-22 rounded-full shrink-0 m-2"
+        />
         <span class="text-gray-400 text-xs">vs</span>
-        <div
-          class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-          style={`background: ${awayColor}`}
-        >
-          {awayCode}
-        </div>
+        <img
+          src={`/assets/logosEquipos/${awayCode}.png`}
+          alt={awayTeam}
+          class="w-22 h-22 rounded-full shrink-0 m-2"
+        />
       </div>
       <div>
         <p class="text-white text-sm font-semibold">{homeTeam} vs {awayTeam}</p>
@@ -78,6 +76,15 @@ const confianzaStyle = {
       </div>
     </div>
 
+     <!-- Divisor vertical -->
+    <div class="hidden md:block w-px self-stretch bg-[#0B3D2E]"></div>
+
+    <!-- analisis principal -->
+    <div class="flex-1">
+      <p class="text-white text-lg font-bold">Análisis Principal</p>
+      <p class="text-gray-400 text-sm mt-1">Análisis detallado del partido</p>
+    </div>
+
     <!-- Divisor vertical -->
     <div class="hidden md:block w-px self-stretch bg-[#0B3D2E]"></div>
 
@@ -85,14 +92,14 @@ const confianzaStyle = {
     <div class="flex flex-col items-center gap-3 min-w-[100px]">
       <div class="text-center">
         <p class="text-gray-400 text-xs uppercase tracking-wider">Cuota</p>
-        <p class="text-[#0B3D2E] text-4xl font-black">{cuota.toFixed(2)}</p>
+        <p class="text-verde-oscuro text-4xl font-black">{cuota.toFixed(2)}</p>
       </div>
-      <a
+      <!-- <a
         href={href}
         class="bg-[#0B3D2E] hover:bg-[#0A2D24] text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors w-full text-center whitespace-nowrap"
       >
         Ver análisis →
-      </a>
+      </a> -->
     </div>
 
   </div>
