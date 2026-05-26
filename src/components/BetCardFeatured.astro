@@ -24,7 +24,7 @@ const {
 } = Astro.props;
 
 const confianzaStyle = {
-  ALTA:  { text: 'text-[#0B3D2E]',  bars: ['h-1.5', 'h-2.5', 'h-3.5'], barColor: 'bg-[#0B3D2E]' },
+  ALTA:  { text: 'text-verde-claro',  bars: ['h-1.5', 'h-2.5', 'h-3.5'], barColor: 'bg-verde-oscuro' },
   MEDIA: { text: 'text-amber-400',  bars: ['h-1.5', 'h-2.5', 'h-1.5'], barColor: 'bg-amber-400' },
   BAJA:  { text: 'text-red-400',    bars: ['h-1.5', 'h-1',   'h-0.5'], barColor: 'bg-red-400'   },
 }[confianza];
@@ -52,8 +52,8 @@ const confianzaStyle = {
         />
       </div>
       <div>
-        <p class="text-white text-sm font-semibold">{homeTeam} vs {awayTeam}</p>
-        <p class="text-gray-400 text-xs mt-0.5">{league} · {date} · {time}</p>
+        <p class="text-white text-lg font-semibold">{homeTeam} vs {awayTeam}</p>
+        <p class="text-gray-400 text-s mt-0.5">{league} · {date} · {time}</p>
       </div>
     </div>
 
@@ -61,9 +61,9 @@ const confianzaStyle = {
     <div class="hidden md:block w-px self-stretch bg-[#0B3D2E]"></div>
 
     <!-- Tipo de apuesta + confianza -->
-    <div class="flex-1">
-      <p class="text-white text-xl font-bold">{betType}</p>
-      <p class="text-gray-400 text-xs uppercase tracking-wider mt-1">Tipo de apuesta</p>
+    <div class="flex-1 max-w-[250px]">
+      <p class="text-white text-3xl font-bold">{betType}</p>
+      <p class="text-gray-400 text-s uppercase tracking-wider mt-1">Tipo de apuesta</p>
       <div class="flex items-center gap-2 mt-3">
         <span class={`text-sm font-medium ${confianzaStyle.text}`}>
           Confianza: {confianza}
@@ -101,6 +101,6 @@ const confianzaStyle = {
         Ver análisis →
       </a> -->
     </div>
-
   </div>
+  
 </div>
