@@ -3,3 +3,26 @@
     --color-verde-oscuro: #25C146;
     --color-verde-claro: #33C14B;
 }
+.icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 9999px;
+    border: 1px solid rgb(34 197 94 / .20);
+    background: #111827;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: .3s;
+}
+
+.icon:hover {
+    transform: translateY(-6px);
+    border-color: rgb(34 197 94);
+}
+
+.icon img {
+    width: 36px;
+    height: 36px;
+}

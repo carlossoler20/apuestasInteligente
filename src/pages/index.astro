@@ -1,14 +1,40 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import PronosticosSection from '../components/PronosticosSection.astro';
+import MainCard from '../components/MainCard.astro';
+import SecondCard from '../components/SecondCard.astro';
+import TertiaryCard from '../components/TertiaryCard.astro';
+import MainLeagues from '../components/MainLeagues.astro';
+import SectionBlog from '../components/SectionBlog.astro';
 import FeaturesBar from '../components/FeaturesBar.astro';
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Hero/>
-	<PronosticosSection/>
-	<FeaturesBar/>
+
+  <section class="mb-8">
+    <Hero />
+  </section>
+
+  <section class="mb-8">
+    <MainCard />
+  </section>
+
+  <section class="mb-8">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <SecondCard />
+      <SecondCard />
+    </div>
+  </section>
+
+ <div class="grid grid-cols-1 gap-6 xl:grid-cols-3 pb-5">
+    <TertiaryCard />
+    <TertiaryCard />
+    <TertiaryCard />
+  </div>
+
+  <MainLeagues />
+  <SectionBlog />
+  <FeaturesBar />
 </Layout>
