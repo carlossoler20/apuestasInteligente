@@ -3,6 +3,25 @@
     --color-verde-oscuro: #25C146;
     --color-verde-claro: #33C14B;
 }
+
+/* Evita desbordes horizontales en pantallas pequeñas */
+html {
+    overflow-x: clip;
+}
+
+body {
+    text-wrap: pretty;
+}
+
+h1, h2, h3 {
+    text-wrap: balance;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 .icon {
     width: 72px;
     height: 72px;
@@ -14,15 +33,40 @@
     align-items: center;
     justify-content: center;
 
-    transition: .3s;
+    transition: transform .3s, border-color .3s;
 }
 
-.icon:hover {
-    transform: translateY(-6px);
-    border-color: rgb(34 197 94);
+/* Tamaño responsivo de los logos de ligas */
+@media (max-width: 400px) {
+    .icon {
+        width: 52px;
+        height: 52px;
+    }
+    .icon img {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+/* El efecto hover solo en dispositivos con puntero fino (evita "pegajosidad" en táctil) */
+@media (hover: hover) and (pointer: fine) {
+    .icon:hover {
+        transform: translateY(-6px);
+        border-color: rgb(34 197 94);
+    }
 }
 
 .icon img {
     width: 36px;
     height: 36px;
+    object-fit: contain;
+}
+
+/* Respeta la preferencia del usuario de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

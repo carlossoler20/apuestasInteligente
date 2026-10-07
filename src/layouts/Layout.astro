@@ -7,15 +7,18 @@ import Footer from '../components/Footer.astro';
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="theme-color" content="#01060c" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Apuestas Inteligente</title>
 	</head>
-	<body class="bg-gradient-to-b from-[#01060c] to-[#011204] p-6">
+	<body class="min-h-dvh bg-gradient-to-b from-[#01060c] to-[#011204] px-3 py-4 sm:px-6 sm:py-6 antialiased">
 		<NavBar />
-		<slot />
+		<main class="mx-auto w-full max-w-7xl">
+			<slot />
+		</main>
 		<Footer />
 	</body>
 </html>
