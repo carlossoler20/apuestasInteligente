@@ -5,9 +5,12 @@ import PredCardSecondary from './PredCardSecondary.astro';
 
 const activas = getApuestasActivas();
 const destacada = activas.find((a) => a.nivel === 'destacado') ?? activas[0];
-const secundarias = activas.filter((a) => a !== destacada && a.nivel === 'secundario').slice(0, 2);
-const terciarias = activas
-  .filter((a) => a !== destacada && !secundarias.includes(a))
+const sinDestacar = activas.filter((a) => a !== destacada);
+// Se toman como máximo 2 secundarias y 3 terciarias: así el layout del inicio
+// siempre queda completo (con jugadas cerradas no se distorsiona la grilla).
+const secundarias = sinDestacar.filter((a) => a.nivel === 'secundario').slice(0, 2);
+const terciarias = sinDestacar
+  .filter((a) => a.nivel !== 'secundario' || secundarias.length < 2)
   .slice(0, 3);
 ---
 
