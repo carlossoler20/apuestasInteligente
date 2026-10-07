@@ -1,42 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import PicksSection from '../components/PicksSection.astro';
+import MainCard from '../components/MainCard.astro';
+import SecondCard from '../components/SecondCard.astro';
+import TertiaryCard from '../components/TertiaryCard.astro';
 import MainLeagues from '../components/MainLeagues.astro';
 import SectionBlog from '../components/SectionBlog.astro';
 import FeaturesBar from '../components/FeaturesBar.astro';
-import {
-  apuestas,
-  administradores,
-  getRendimientoGeneral,
-} from '../data/predictions';
-
-const r = getRendimientoGeneral();
-const fmt = (n: number, dec = 2) => n.toFixed(dec);
-
-// Estadísticas por administrador (basadas en sus apuestas cerradas).
-// Las NULAS (push/void) cuentan como cerradas pero no afectan beneficio ni win rate.
-const adminsStats = administradores.map((adm) => {
-  const suyas = apuestas.filter((a) => a.admin === adm.apodo);
-  const cerradas = suyas.filter((a) => a.resultado !== 'pendiente');
-  const ganadas = cerradas.filter((a) => a.resultado === 'ganada').length;
-  const perdidas = cerradas.filter((a) => a.resultado === 'perdida').length;
-  const nulas = cerradas.filter((a) => a.resultado === 'nula').length;
-  const apostado = suyas
-    .filter((a) => a.resultado === 'ganada' || a.resultado === 'perdida')
-    .reduce((acc, a) => acc + a.unidades, 0);
-  const beneficio =
-    ganadas
-      ? cerradas.filter((a) => a.resultado === 'ganada').reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0)
-      : 0;
-  const perdidaU = perdidas
-    ? cerradas.filter((a) => a.resultado === 'perdida').reduce((acc, a) => acc + a.unidades, 0)
-    : 0;
-  const roi = apostado ? ((beneficio - perdidaU) / apostado) * 100 : 0;
-  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, nulas, roi };
-});
-// Apuestas decididas (ganadas + perdidas), sin contar nulas — base de las barras.
-const decididas = r.ganadas + r.perdidas;
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
@@ -45,125 +17,22 @@ const decididas = r.ganadas + r.perdidas;
     <Hero />
   </section>
 
-  <!-- Pronósticos registrados por los administradores -->
-  <PicksSection />
+  <section class="mb-8" id="picks">
+    <MainCard />
+  </section>
 
-  <!-- Rendimiento general (calculado del historial de /results) -->
-  <section class="mb-10" id="rendimiento">
-    <div class="rounded-2xl border border-slate-800 bg-[#07111d]/90 p-4 sm:p-6 backdrop-blur">
-      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-xl sm:text-2xl font-bold text-white">Rendimiento general</h2>
-        <a
-          href="/results"
-          class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-white transition hover:border-green-500 hover:text-green-400 active:border-green-500"
-        >
-          Ver historial completo →
-        </a>
-      </div>
-
-      <!-- Stats -->
-      <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-        <div class="rounded-2xl border border-slate-800 p-4">
-          <p class="text-sm text-slate-400">ROI</p>
-          <p class={`mt-2 text-xl sm:text-2xl lg:text-3xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {r.roi >= 0 ? '+' : ''}{fmt(r.roi)}%
-          </p>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 p-4">
-          <p class="text-sm text-slate-400">Win Rate</p>
-          <p class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">
-            {fmt(r.winRate, 1)}%
-          </p>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 p-4">
-          <p class="text-sm text-slate-400">Pronósticos</p>
-          <p class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-            {r.totalPronosticos}
-          </p>
-          <p class="mt-1 text-xs text-slate-500">
-            {r.cerradas} cerrados · {r.pendientes} pendientes
-          </p>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 p-4">
-          <p class="text-sm text-slate-400">Beneficio</p>
-          <p class={`mt-2 text-xl sm:text-2xl lg:text-3xl font-bold ${r.beneficio >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {r.beneficio >= 0 ? '+' : ''}{fmt(r.beneficio, 1)} U
-          </p>
-        </div>
-      </div>
-
-      <!-- Desglose + resumen por admin -->
-      <div class="mt-6 grid gap-4 lg:grid-cols-2">
-
-        <div class="rounded-2xl border border-slate-800 p-5">
-          <h3 class="mb-4 text-lg font-semibold text-white">Ganadas vs Perdidas</h3>
-
-          <div class="flex-1">
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-green-500 font-semibold">Ganadas</span>
-              <span class="text-slate-300">{r.ganadas}</span>
-            </div>
-            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
-              <div
-                class="h-full rounded-full bg-green-500"
-                style={`width: ${decididas ? (r.ganadas / decididas) * 100 : 0}%`}
-              ></div>
-            </div>
-          </div>
-
-          <div class="mt-4 flex-1">
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-red-500 font-semibold">Perdidas</span>
-              <span class="text-slate-300">{r.perdidas}</span>
-            </div>
-            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
-              <div
-                class="h-full rounded-full bg-red-500"
-                style={`width: ${decididas ? (r.perdidas / decididas) * 100 : 0}%`}
-              ></div>
-            </div>
-          </div>
-
-          <div class="mt-4 flex-1">
-            <div class="flex justify-between text-sm mb-1">
-              <span class="text-slate-400 font-semibold">Nulas (stake devuelto)</span>
-              <span class="text-slate-300">{r.nulas}</span>
-            </div>
-            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
-              <div
-                class="h-full rounded-full bg-slate-500"
-                style={`width: ${r.cerradas ? (r.nulas / r.cerradas) * 100 : 0}%`}
-              ></div>
-            </div>
-            <p class="mt-2 text-xs text-slate-500">
-              Las nulas (push/void) no cuentan para el Win Rate ni el ROI: la casa devuelve lo apostado.
-            </p>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800 p-5">
-          <h3 class="mb-4 text-lg font-semibold text-white">Resumen por administrador</h3>
-          <ul class="space-y-3 text-sm">
-            {adminsStats.map((s) => (
-              <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                <span class="text-slate-300 font-medium">{s.apodo}</span>
-                <span class="text-slate-400">
-                  {s.ganadas}G / {s.perdidas}P{s.nulas ? ` / ${s.nulas}N` : ''} · {s.total} picks
-                </span>
-                <span class={`font-bold ${s.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}% ROI
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-      </div>
+  <section class="mb-8">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <SecondCard />
+      <SecondCard />
     </div>
   </section>
+
+ <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 pb-5">
+    <TertiaryCard />
+    <TertiaryCard />
+    <TertiaryCard />
+  </div>
 
   <MainLeagues />
   <SectionBlog />
