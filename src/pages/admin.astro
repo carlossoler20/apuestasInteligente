@@ -1,0 +1,346 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  apuestas,
+  administradores,
+  getRendimientoGeneral,
+  formatearFecha,
+} from '../data/predictions';
+import type { Apuesta } from '../data/predictions';
+
+const r = getRendimientoGeneral();
+const registro: Apuesta[] = [...apuestas].sort((a, b) => b.id - a.id);
+const logosDisponibles = [
+  'RM.png', 'RB.png', 'arsenal.png', 'chelsea.png', 'inter.png', 'napoli.png',
+];
+---
+
+<Layout>
+  <section class="py-8 sm:py-12">
+
+    <!-- Encabezado -->
+    <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h1 class="text-[clamp(1.75rem,5vw,2.5rem)] font-bold text-white">
+          Panel de administración
+        </h1>
+        <p class="mt-2 max-w-xl text-sm sm:text-base text-slate-400">
+          Registra las apuestas deportivas que se muestran en las cards del inicio
+          y alimentan el historial de <a href="/results" class="text-green-500 hover:text-green-400">/results</a>.
+        </p>
+      </div>
+      <span class="inline-flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-xs font-semibold text-yellow-400">
+        🔒 Acceso restringido a administradores
+      </span>
+    </div>
+
+    <!-- Resumen rápido -->
+    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Picks totales</p>
+        <p class="mt-1 text-2xl font-bold text-white">{r.totalPronosticos}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Pendientes</p>
+        <p class="mt-1 text-2xl font-bold text-yellow-400">{r.pendientes}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Ganadas</p>
+        <p class="mt-1 text-2xl font-bold text-green-500">{r.ganadas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Perdidas</p>
+        <p class="mt-1 text-2xl font-bold text-red-500">{r.perdidas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Nulas</p>
+        <p class="mt-1 text-2xl font-bold text-slate-300">{r.nulas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
+        <p class="mt-1 text-2xl font-bold text-green-500">{r.winRate.toFixed(1)}%</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center col-span-2 sm:col-span-1">
+        <p class="text-xs uppercase tracking-wide text-slate-500">ROI</p>
+        <p class={`mt-1 text-2xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
+        </p>
+      </div>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+
+      <!-- ===== Formulario para registrar apuesta ===== -->
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/80 p-5 sm:p-6">
+        <h2 class="text-xl font-bold text-white">Registrar nueva apuesta</h2>
+        <p class="mt-1 text-sm text-slate-400">
+          Al publicarse aparecerá en la card correspondiente del inicio y en el historial de resultados.
+        </p>
+
+        <form id="form-apuesta" class="mt-6 space-y-4">
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Administrador</span>
+              <select name="admin" required class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
+                {administradores.map((adm) => (
+                  <option value={adm.apodo}>{adm.nombre} ({adm.apodo})</option>
+                ))}
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Liga</span>
+              <input name="liga" type="text" required placeholder="LaLiga"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Equipo local</span>
+              <input name="equipoLocal" type="text" required placeholder="Real Madrid"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Logo local</span>
+              <select name="logoLocal" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
+                {logosDisponibles.map((l) => (<option value={`/assets/logosEquipos/${l}`}>{l.replace('.png','')}</option>))}
+              </select>
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Equipo visitante</span>
+              <input name="equipoVisitante" type="text" required placeholder="Real Betis"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Logo visitante</span>
+              <select name="logoVisitante" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
+                {logosDisponibles.map((l) => (<option value={`/assets/logosEquipos/${l}`}>{l.replace('.png','')}</option>))}
+              </select>
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Fecha</span>
+              <input name="fecha" type="date" required
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Hora</span>
+              <input name="hora" type="time" required
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Pronóstico</span>
+              <input name="pronostico" type="text" required placeholder="Más de 2.5 goles"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Tipo de apuesta</span>
+              <input name="tipoApuesta" type="text" required list="tipos-apuesta" placeholder="Over/Under"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+              <datalist id="tipos-apuesta">
+                <option value="Over/Under"></option>
+                <option value="Resultado (1X2)"></option>
+                <option value="Ganar sin empates (Draw No Bet)"></option>
+                <option value="Hándicap asiático"></option>
+                <option value="Hándicap europeo"></option>
+                <option value="Ambos marcan"></option>
+                <option value="Doble oportunidad"></option>
+                <option value="Resultado medio tiempo"></option>
+              </datalist>
+              <span class="mt-1 block text-xs text-slate-500">
+                "Ganar sin empates" y hándicaps pueden quedar <strong class="text-slate-400">NULAS</strong>:
+                se devuelve el stake (0 U).
+              </span>
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-4">
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Cuota</span>
+              <input name="cuota" type="number" step="0.01" min="1.01" required placeholder="1.85"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Confianza</span>
+              <select name="confianza" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
+                <option>ALTA</option><option selected>MEDIA</option><option>BAJA</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Nivel card</span>
+              <select name="nivel" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
+                <option value="destacado">Destacado</option>
+                <option value="secundario" selected>Secundario</option>
+                <option value="terciario">Terciario</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-sm font-medium text-slate-300">Stake (U)</span>
+              <input name="unidades" type="number" step="0.5" min="0.5" value="1"
+                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
+            </label>
+          </div>
+
+          <label class="block">
+            <span class="mb-1 block text-sm font-medium text-slate-300">Comentario / análisis breve</span>
+            <textarea name="comentario" rows="3" placeholder="Ambos equipos llegan con toda su ofensiva…"
+              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none"></textarea>
+          </label>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button type="submit"
+              class="w-full sm:w-auto rounded-xl bg-green-500 px-6 py-3 font-semibold text-black transition hover:bg-green-400 active:bg-green-400">
+              Guardar apuesta
+            </button>
+            <p id="msg-apuesta" class="text-sm text-slate-400" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== Administradores ===== -->
+      <div class="space-y-8">
+        <div class="rounded-2xl border border-slate-800 bg-[#07111d]/80 p-5 sm:p-6">
+          <h2 class="text-xl font-bold text-white">Administradores</h2>
+          <p class="mt-1 text-sm text-slate-400">
+            Cualquier cantidad de administradores puede registrarse aquí.
+          </p>
+
+          <ul class="mt-4 space-y-3">
+            {administradores.map((adm) => {
+              const picks = apuestas.filter((a) => a.admin === adm.apodo).length;
+              return (
+                <li class="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
+                  <div class="min-w-0">
+                    <p class="truncate font-semibold text-white">{adm.nombre}</p>
+                    <p class="text-xs text-slate-500">{adm.apodo} · {picks} picks</p>
+                  </div>
+                  <span class="shrink-0 rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-400">Activo</span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <form id="form-admin" class="mt-5 space-y-3">
+            <input name="nombre" type="text" required placeholder="Nombre completo"
+              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            <input name="apodo" type="text" required placeholder="@apodo"
+              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+            <button type="submit"
+              class="w-full rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-2.5 text-sm font-semibold text-green-400 transition hover:bg-green-500/20 active:bg-green-500/20">
+              + Añadir administrador
+            </button>
+            <p id="msg-admin" class="text-sm text-slate-400" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Registro de partidos ===== -->
+    <div class="mt-10 rounded-2xl border border-slate-800 bg-[#07111d]/60">
+      <div class="border-b border-slate-800 p-5 sm:p-6">
+        <h2 class="text-xl font-bold text-white">Registro de partidos</h2>
+        <p class="mt-1 text-sm text-slate-400">
+          Todas las apuestas registradas. Cambia el resultado cuando cierre el partido:
+          ganada, perdida o <strong class="text-slate-300">nula</strong> (push/void — se devuelve
+          el stake, p. ej. en "Ganar sin empates" o hándicaps que quedan exactos).
+        </p>
+      </div>
+
+      <ul class="divide-y divide-slate-800">
+        {registro.map((a) => (
+          <li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div class="min-w-0">
+              <p class="font-semibold text-white">
+                {a.equipoLocal} vs {a.equipoVisitante}
+                <span class="ml-2 text-xs font-normal text-slate-500">{a.liga} • {formatearFecha(a.fecha)} • {a.hora}</span>
+              </p>
+              <p class="mt-1 text-sm text-slate-400">
+                {a.pronostico} · cuota <span class="text-green-400 font-semibold">{a.cuota.toFixed(2)}</span> · {a.confianza} · por {a.admin}
+              </p>
+            </div>
+            <span class={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
+              a.resultado === 'ganada' ? 'border-green-500/30 bg-green-500/15 text-green-400'
+              : a.resultado === 'perdida' ? 'border-red-500/30 bg-red-500/15 text-red-400'
+              : a.resultado === 'nula' ? 'border-slate-500/30 bg-slate-500/15 text-slate-300'
+              : 'border-yellow-500/30 bg-yellow-500/15 text-yellow-400'}`}>
+              {a.resultado === 'ganada' ? '✔ Ganada'
+                : a.resultado === 'perdida' ? '✘ Perdida'
+                : a.resultado === 'nula' ? '➖ Nula (stake devuelto)'
+                : '⏳ Pendiente'}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+  </section>
+
+  <script>
+    // ---- Persistencia local del registro (borrador del admin) ----
+    // En producción estos datos se sincronizan con src/data/predictions.ts
+    // o con una base de datos/CMS. Aquí usamos localStorage para prototipar.
+    const KEY_APUESTAS = 'ai_apuestas_v1';
+    const KEY_ADMINS = 'ai_admins_v1';
+
+    const leer = <T>(key: string, fallback: T): T => {
+      try { return JSON.parse(localStorage.getItem(key) || '') ?? fallback; }
+      catch { return fallback; }
+    };
+
+    const msg = (id: string, texto: string) => {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = texto; setTimeout(() => (el.textContent = ''), 4000); }
+    };
+
+    document.getElementById('form-apuesta')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const data = new FormData(form);
+      const extra = leer<any[]>(KEY_APUESTAS, []);
+      const nueva = {
+        id: Date.now(),
+        admin: data.get('admin'),
+        equipoLocal: data.get('equipoLocal'),
+        logoLocal: data.get('logoLocal'),
+        equipoVisitante: data.get('equipoVisitante'),
+        logoVisitante: data.get('logoVisitante'),
+        liga: data.get('liga'),
+        fecha: data.get('fecha'),
+        hora: data.get('hora'),
+        pronostico: data.get('pronostico'),
+        tipoApuesta: data.get('tipoApuesta'),
+        cuota: Number(data.get('cuota')),
+        confianza: data.get('confianza'),
+        nivel: data.get('nivel'),
+        resultado: 'pendiente',
+        unidades: Number(data.get('unidades') || 1),
+        comentario: data.get('comentario') || '',
+      };
+      localStorage.setItem(KEY_APUESTAS, JSON.stringify([nueva, ...extra]));
+      form.reset();
+      msg('msg-apuesta', '✔ Apuesta guardada como borrador local. Publícala en src/data/predictions.ts.');
+    });
+
+    document.getElementById('form-admin')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const data = new FormData(form);
+      const extra = leer<any[]>(KEY_ADMINS, []);
+      const apodo = String(data.get('apodo') || '');
+      const nuevo = { nombre: String(data.get('nombre') || ''), apodo: apodo.startsWith('@') ? apodo : '@' + apodo };
+      localStorage.setItem(KEY_ADMINS, JSON.stringify([...extra, nuevo]));
+      form.reset();
+      msg('msg-admin', '✔ Administrador añadido como borrador local.');
+    });
+  </script>
+</Layout>
