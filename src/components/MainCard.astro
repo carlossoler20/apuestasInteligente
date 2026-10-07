@@ -1,20 +1,20 @@
-<div class="w-full max-w-6xl mx-auto p-4">
+<div class="w-full max-w-6xl mx-auto">
   <div
     class="relative overflow-hidden rounded-2xl border border-green-500/40 bg-gradient-to-r from-[#07121f] via-[#081524] to-[#07121f] p-4 md:p-6"
   >
     <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
       <!-- Partido -->
-      <div class="flex flex-col gap-4 lg:w-1/3">
+      <div class="flex flex-col gap-4 min-w-0 lg:w-1/3">
         <div class="flex items-center gap-2 text-green-400 text-xs font-semibold uppercase">
           ⭐ Pronóstico destacado
         </div>
 
-        <div class="flex items-center justify-center gap-4">
+        <div class="flex items-center justify-center gap-3 sm:gap-4">
           <img
             src="/assets/logosEquipos/RM.png"
             alt="Real Madrid"
-            class="h-14 w-14 md:h-20 md:w-20"
+            class="h-12 w-12 sm:h-14 sm:w-14 md:h-20 md:w-20 object-contain"
           />
 
           <span class="text-white font-bold text-lg">VS</span>
@@ -22,7 +22,7 @@
           <img
             src="/assets/logosEquipos/RB.png"
             alt="Real Betis"
-            class="h-14 w-14 md:h-20 md:w-20"
+            class="h-12 w-12 sm:h-14 sm:w-14 md:h-20 md:w-20 object-contain"
           />
         </div>
 
@@ -41,8 +41,8 @@
       <div class="hidden lg:block h-24 w-px bg-white/10"></div>
 
       <!-- Pronóstico -->
-      <div class="text-center lg:text-left lg:w-1/3">
-        <h2 class="text-white text-2xl md:text-3xl font-bold">
+      <div class="min-w-0 text-center lg:text-left lg:w-1/3">
+        <h2 class="text-white text-2xl md:text-3xl font-bold break-words">
           Más de 2.5 goles
         </h2>
 
@@ -69,17 +69,17 @@
       <div class="hidden lg:block h-24 w-px bg-white/10"></div>
 
       <!-- Cuota -->
-      <div class="text-center lg:w-1/4">
+      <div class="min-w-0 text-center lg:w-1/4">
         <p class="text-gray-500 uppercase text-xs tracking-wider">
           Cuota
         </p>
 
-        <div class="text-green-400 text-5xl font-bold mt-2">
+        <div class="text-green-400 text-4xl sm:text-5xl font-bold mt-2">
           1.85
         </div>
 
         <button
-          class="text-xs mt-4 w-full lg:w-auto rounded-xl bg-green-500 px-8 py-3 font-semibold text-black transition hover:bg-green-400"
+          class="text-sm sm:text-xs mt-4 w-full lg:w-auto rounded-xl bg-green-500 px-6 sm:px-8 py-3 font-semibold text-black transition hover:bg-green-400 active:bg-green-400"
         >
           Ambos equipos llegan con toda su ofensiva, se espera un partido con muchos goles. ¡Apuesta ahora!
         </button>

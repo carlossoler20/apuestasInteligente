@@ -2,45 +2,47 @@
 import { Image } from 'astro:assets';
 import logo from '../assets/logof.png';
 ---
-<header>
+<header class="bg-[#01060c]/85 backdrop-blur-md border-b border-white/5">
 <nav class="text-white sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
-            <div class="flex-shrink-0">
-                <!--<Image src={logo} alt="Logo" class="h-10 w-auto" /> --> <a href="/"><span class="text-xl font-bold text-verde-oscuro">Apuestas Inteligente</span></a>
+            <div class="flex-shrink-0 min-w-0">
+                <!--<Image src={logo} alt="Logo" class="h-10 w-auto" /> --> <a href="/" class="inline-block"><span class="text-lg sm:text-xl font-bold text-verde-oscuro leading-tight">Apuestas Inteligente</span></a>
             </div>
 
             <!-- Menu Desktop -->
             <ul class="hidden md:flex gap-8">
-                <li><a href="/" class="hover:text-[#0B3D2E] transition">Inicio</a></li>
-                <li><a href="/#picks" class="hover:text-[#0B3D2E] transition">Pronósticos</a></li>
-                <li><a href="/results" class="hover:text-[#0B3D2E] transition">Resultados</a></li>
-                <li><a href="/blog" class="hover:text-[#0B3D2E] transition">Blog</a></li>
-                <li><a href="/contact" class="hover:text-[#0B3D2E] transition">Contacto</a></li>
+                <li><a href="/" class="hover:text-verde-claro active:text-verde-claro transition">Inicio</a></li>
+                <li><a href="/#picks" class="hover:text-verde-claro active:text-verde-claro transition">Pronósticos</a></li>
+                <li><a href="/results" class="hover:text-verde-claro active:text-verde-claro transition">Resultados</a></li>
+                <li><a href="/blog" class="hover:text-verde-claro active:text-verde-claro transition">Blog</a></li>
+                <li><a href="/contact" class="hover:text-verde-claro active:text-verde-claro transition">Contacto</a></li>
             </ul>
 
             <!-- Hamburger Button Mobile -->
             <button 
                 id="hamburger" 
-                class="md:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-[#0B3D2E] focus:outline-none transition"
-                aria-label="Toggle menu"
+                class="md:hidden inline-flex items-center justify-center p-2 -mr-2 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 transition touch-manipulation"
+                aria-label="Abrir menú"
+                aria-expanded="false"
+                aria-controls="mobile-menu"
             >
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
         </div>
     </div>
 
     <!-- Menu Mobile -->
-    <div id="mobile-menu" class="hidden md:hidden bg-[#121212]">
+    <div id="mobile-menu" class="hidden md:hidden bg-[#121212]/95 backdrop-blur-md">
         <ul class="px-2 pt-2 pb-3 space-y-1">
-            <li><a href="/" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Inicio</a></li>
-            <li><a href="/#picks" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Pronósticos</a></li>
-            <li><a href="/results" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Resultados</a></li>
-            <li><a href="/blog" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Blog</a></li>
-            <li><a href="/contact" class="block px-3 py-2 rounded-md hover:bg-[#0B3D2E] transition">Contacto</a></li>
+            <li><a href="/" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Inicio</a></li>
+            <li><a href="/#picks" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Pronósticos</a></li>
+            <li><a href="/results" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Resultados</a></li>
+            <li><a href="/blog" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Blog</a></li>
+            <li><a href="/contact" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Contacto</a></li>
         </ul>
     </div>
 </nav>
@@ -49,14 +51,22 @@ import logo from '../assets/logof.png';
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
 
+    const setOpen = (open) => {
+        mobileMenu?.classList.toggle('hidden', !open);
+        hamburger?.setAttribute('aria-expanded', String(open));
+    };
+
     hamburger?.addEventListener('click', () => {
-        mobileMenu?.classList.toggle('hidden');
+        setOpen(mobileMenu?.classList.contains('hidden'));
     });
 
     // Cerrar el menú al hacer clic en un enlace
     document.querySelectorAll('#mobile-menu a').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu?.classList.add('hidden');
-        });
+        link.addEventListener('click', () => setOpen(false));
+    });
+
+    // Cerrar con la tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') setOpen(false);
     });
 </script>

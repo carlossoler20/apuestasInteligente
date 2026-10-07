@@ -5,15 +5,15 @@
       Terciario
     </span>
 
-    <div class="mt-4 flex gap-4">
+    <div class="mt-4 flex flex-col gap-4 sm:flex-row">
 
       <!-- Equipos -->
-      <div class="flex-1">
+      <div class="flex-1 min-w-0">
         <div class="flex items-center justify-center gap-4">
           <img
             src="/assets/logosEquipos/arsenal.png"
             alt="Arsenal"
-            class="h-14 w-14 object-contain"
+            class="h-12 w-12 sm:h-14 sm:w-14 object-contain"
           />
 
           <span class="font-bold text-white">VS</span>
@@ -21,7 +21,7 @@
           <img
             src="/assets/logosEquipos/chelsea.png"
             alt="Chelsea"
-            class="h-14 w-14 object-contain"
+            class="h-12 w-12 sm:h-14 sm:w-14 object-contain"
           />
         </div>
 
@@ -36,13 +36,13 @@
         </div>
       </div>
 
-      <!-- Separador -->
-      <div class="w-px bg-slate-800"></div>
+      <!-- Separador (solo en pantallas pequeñas hacia arriba) -->
+      <div class="hidden sm:block w-px bg-slate-800"></div>
 
       <!-- Pronóstico -->
-      <div class="flex flex-col justify-between">
+      <div class="flex flex-col justify-between min-w-0 text-center sm:text-left">
         <div>
-          <h2 class="text-2xl font-bold text-white">
+          <h2 class="text-2xl font-bold text-white break-words">
             Más de 1.5 goles
           </h2>
 
@@ -50,14 +50,14 @@
             Cuota
           </p>
 
-          <p class="text-5xl font-bold text-green-500">
+          <p class="text-4xl sm:text-5xl font-bold text-green-500">
             1.40
           </p>
         </div>
 
         <a
           href="#"
-          class="mt-6 font-semibold text-green-500 hover:text-green-400"
+          class="mt-6 inline-block font-semibold text-green-500 hover:text-green-400 active:text-green-400"
         >
           Ver análisis →
         </a>
