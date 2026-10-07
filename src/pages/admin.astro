@@ -35,7 +35,7 @@ const logosDisponibles = [
     </div>
 
     <!-- Resumen rápido -->
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
         <p class="text-xs uppercase tracking-wide text-slate-500">Picks totales</p>
         <p class="mt-1 text-2xl font-bold text-white">{r.totalPronosticos}</p>
@@ -45,10 +45,22 @@ const logosDisponibles = [
         <p class="mt-1 text-2xl font-bold text-yellow-400">{r.pendientes}</p>
       </div>
       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Ganadas</p>
+        <p class="mt-1 text-2xl font-bold text-green-500">{r.ganadas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Perdidas</p>
+        <p class="mt-1 text-2xl font-bold text-red-500">{r.perdidas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Nulas</p>
+        <p class="mt-1 text-2xl font-bold text-slate-300">{r.nulas}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
         <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
         <p class="mt-1 text-2xl font-bold text-green-500">{r.winRate.toFixed(1)}%</p>
       </div>
-      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center col-span-2 sm:col-span-1">
         <p class="text-xs uppercase tracking-wide text-slate-500">ROI</p>
         <p class={`mt-1 text-2xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
           {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
@@ -133,8 +145,22 @@ const logosDisponibles = [
             </label>
             <label class="block">
               <span class="mb-1 block text-sm font-medium text-slate-300">Tipo de apuesta</span>
-              <input name="tipoApuesta" type="text" required placeholder="Over/Under"
+              <input name="tipoApuesta" type="text" required list="tipos-apuesta" placeholder="Over/Under"
                 class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
+              <datalist id="tipos-apuesta">
+                <option value="Over/Under"></option>
+                <option value="Resultado (1X2)"></option>
+                <option value="Ganar sin empates (Draw No Bet)"></option>
+                <option value="Hándicap asiático"></option>
+                <option value="Hándicap europeo"></option>
+                <option value="Ambos marcan"></option>
+                <option value="Doble oportunidad"></option>
+                <option value="Resultado medio tiempo"></option>
+              </datalist>
+              <span class="mt-1 block text-xs text-slate-500">
+                "Ganar sin empates" y hándicaps pueden quedar <strong class="text-slate-400">NULAS</strong>:
+                se devuelve el stake (0 U).
+              </span>
             </label>
           </div>
 
@@ -224,7 +250,9 @@ const logosDisponibles = [
       <div class="border-b border-slate-800 p-5 sm:p-6">
         <h2 class="text-xl font-bold text-white">Registro de partidos</h2>
         <p class="mt-1 text-sm text-slate-400">
-          Todas las apuestas registradas. Cambia el resultado a ganada/perdida cuando cierre el partido.
+          Todas las apuestas registradas. Cambia el resultado cuando cierre el partido:
+          ganada, perdida o <strong class="text-slate-300">nula</strong> (push/void — se devuelve
+          el stake, p. ej. en "Ganar sin empates" o hándicaps que quedan exactos).
         </p>
       </div>
 
@@ -243,8 +271,12 @@ const logosDisponibles = [
             <span class={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
               a.resultado === 'ganada' ? 'border-green-500/30 bg-green-500/15 text-green-400'
               : a.resultado === 'perdida' ? 'border-red-500/30 bg-red-500/15 text-red-400'
+              : a.resultado === 'nula' ? 'border-slate-500/30 bg-slate-500/15 text-slate-300'
               : 'border-yellow-500/30 bg-yellow-500/15 text-yellow-400'}`}>
-              {a.resultado === 'ganada' ? '✔ Ganada' : a.resultado === 'perdida' ? '✘ Perdida' : '⏳ Pendiente'}
+              {a.resultado === 'ganada' ? '✔ Ganada'
+                : a.resultado === 'perdida' ? '✘ Perdida'
+                : a.resultado === 'nula' ? '➖ Nula (stake devuelto)'
+                : '⏳ Pendiente'}
             </span>
           </li>
         ))}

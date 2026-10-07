@@ -14,13 +14,17 @@ import {
 const r = getRendimientoGeneral();
 const fmt = (n: number, dec = 2) => n.toFixed(dec);
 
-// Estadísticas por administrador (basadas en sus apuestas cerradas)
+// Estadísticas por administrador (basadas en sus apuestas cerradas).
+// Las NULAS (push/void) cuentan como cerradas pero no afectan beneficio ni win rate.
 const adminsStats = administradores.map((adm) => {
   const suyas = apuestas.filter((a) => a.admin === adm.apodo);
   const cerradas = suyas.filter((a) => a.resultado !== 'pendiente');
   const ganadas = cerradas.filter((a) => a.resultado === 'ganada').length;
   const perdidas = cerradas.filter((a) => a.resultado === 'perdida').length;
-  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
+  const nulas = cerradas.filter((a) => a.resultado === 'nula').length;
+  const apostado = suyas
+    .filter((a) => a.resultado === 'ganada' || a.resultado === 'perdida')
+    .reduce((acc, a) => acc + a.unidades, 0);
   const beneficio =
     ganadas
       ? cerradas.filter((a) => a.resultado === 'ganada').reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0)
@@ -29,8 +33,10 @@ const adminsStats = administradores.map((adm) => {
     ? cerradas.filter((a) => a.resultado === 'perdida').reduce((acc, a) => acc + a.unidades, 0)
     : 0;
   const roi = apostado ? ((beneficio - perdidaU) / apostado) * 100 : 0;
-  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, roi };
+  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, nulas, roi };
 });
+// Apuestas decididas (ganadas + perdidas), sin contar nulas — base de las barras.
+const decididas = r.ganadas + r.perdidas;
 ---
 
 <Layout>
@@ -103,7 +109,7 @@ const adminsStats = administradores.map((adm) => {
             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
               <div
                 class="h-full rounded-full bg-green-500"
-                style={`width: ${r.cerradas ? (r.ganadas / r.cerradas) * 100 : 0}%`}
+                style={`width: ${decididas ? (r.ganadas / decididas) * 100 : 0}%`}
               ></div>
             </div>
           </div>
@@ -116,9 +122,25 @@ const adminsStats = administradores.map((adm) => {
             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
               <div
                 class="h-full rounded-full bg-red-500"
-                style={`width: ${r.cerradas ? (r.perdidas / r.cerradas) * 100 : 0}%`}
+                style={`width: ${decididas ? (r.perdidas / decididas) * 100 : 0}%`}
               ></div>
             </div>
+          </div>
+
+          <div class="mt-4 flex-1">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-slate-400 font-semibold">Nulas (stake devuelto)</span>
+              <span class="text-slate-300">{r.nulas}</span>
+            </div>
+            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
+              <div
+                class="h-full rounded-full bg-slate-500"
+                style={`width: ${r.cerradas ? (r.nulas / r.cerradas) * 100 : 0}%`}
+              ></div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500">
+              Las nulas (push/void) no cuentan para el Win Rate ni el ROI: la casa devuelve lo apostado.
+            </p>
           </div>
         </div>
 
@@ -128,7 +150,9 @@ const adminsStats = administradores.map((adm) => {
             {adminsStats.map((s) => (
               <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <span class="text-slate-300 font-medium">{s.apodo}</span>
-                <span class="text-slate-400">{s.ganadas}G / {s.perdidas}P · {s.total} picks</span>
+                <span class="text-slate-400">
+                  {s.ganadas}G / {s.perdidas}P{s.nulas ? ` / ${s.nulas}N` : ''} · {s.total} picks
+                </span>
                 <span class={`font-bold ${s.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}% ROI
                 </span>

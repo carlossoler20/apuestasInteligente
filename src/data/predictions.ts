@@ -7,7 +7,17 @@
 // ============================================================
 
 export type Confianza = 'ALTA' | 'MEDIA' | 'BAJA';
-export type ResultadoApuesta = 'ganada' | 'perdida' | 'pendiente';
+/**
+ * Resultados posibles de una apuesta:
+ *  - 'ganada'   : la apuesta acertó
+ *  - 'perdida'  : la apuesta falló
+ *  - 'nula'     : push / void — el stake se devuelve íntegramente (0 U).
+ *                 Ocurre p. ej. en "Ganar sin empates" (Draw No Bet / Asian Goal Line)
+ *                 o en apuestas con hándicap cuando el resultado queda exactamente
+ *                 en el número del hándicap (hándicap asiático .0 / entero).
+ *  - 'pendiente': partido aún no se ha jugado o no se ha cerrado
+ */
+export type ResultadoApuesta = 'ganada' | 'perdida' | 'nula' | 'pendiente';
 export type NivelCard = 'destacado' | 'secundario' | 'terciario';
 
 export interface Administrador {
@@ -205,6 +215,27 @@ export const apuestas: Apuesta[] = [
     unidades: 0.5,
     comentario: 'Apuesta de valor con stake reducido.',
   },
+  // ---- Apuesta NULA (push/void): el stake se devuelve íntegramente ----
+  {
+    id: 9,
+    admin: '@andresr',
+    equipoLocal: 'Milan',
+    logoLocal: '/assets/logosEquipos/inter.png',
+    equipoVisitante: 'Roma',
+    logoVisitante: '/assets/logosEquipos/napoli.png',
+    liga: 'Serie A',
+    fecha: '2026-08-18',
+    hora: '18:00',
+    pronostico: 'Milan gana sin empates (Draw No Bet)',
+    tipoApuesta: 'Ganar sin empates / Hándicap asiático .0',
+    cuota: 1.75,
+    confianza: 'MEDIA',
+    nivel: 'terciario',
+    resultado: 'nula',
+    unidades: 1,
+    comentario:
+      'Empate 1-1 al final del partido: en "Ganar sin empates" la apuesta queda NULA y la casa devuelve el stake (0 U).',
+  },
 ];
 
 // ============================================================
@@ -234,18 +265,27 @@ export function getHistorial(): Apuesta[] {
   return [...apuestas].sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
 }
 
-/** Estadísticas de rendimiento general calculadas del historial cerrado. */
+/** Estadísticas de rendimiento general calculadas del historial cerrado.
+ *  Las apuestas NULAS (push/void) cuentan como cerradas, pero ni se ganan
+ *  ni se pierden: el stake se devuelve, por lo que no afectan al beneficio.
+ *  Se excluyen del Win Rate "efectivo" (solo ganadas vs perdidas). */
 export function getRendimientoGeneral() {
   const cerradas = apuestas.filter((a) => a.resultado !== 'pendiente');
   const ganadas = cerradas.filter((a) => a.resultado === 'ganada');
   const perdidas = cerradas.filter((a) => a.resultado === 'perdida');
+  const nulas = cerradas.filter((a) => a.resultado === 'nula');
 
-  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
+  // Solo se arriesgan unidades en ganadas/perdidas; en nulas se devuelve el stake.
+  const apostado = ganadas
+    .concat(perdidas)
+    .reduce((acc, a) => acc + a.unidades, 0);
   const ganado = ganadas.reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0);
   const perdido = perdidas.reduce((acc, a) => acc + a.unidades, 0);
   const beneficio = ganado - perdido;
 
-  const winRate = cerradas.length ? (ganadas.length / cerradas.length) * 100 : 0;
+  // Win rate sobre decididas (sin contar nulas) — criterio estándar de la industria.
+  const decididas = ganadas.length + perdidas.length;
+  const winRate = decididas ? (ganadas.length / decididas) * 100 : 0;
   const roi = apostado ? (beneficio / apostado) * 100 : 0;
 
   return {
@@ -253,6 +293,7 @@ export function getRendimientoGeneral() {
     cerradas: cerradas.length,
     ganadas: ganadas.length,
     perdidas: perdidas.length,
+    nulas: nulas.length,
     pendientes: apuestas.length - cerradas.length,
     winRate,
     roi,
