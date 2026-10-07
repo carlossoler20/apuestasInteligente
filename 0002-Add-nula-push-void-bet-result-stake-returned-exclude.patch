@@ -1,0 +1,329 @@
+From c48bb649490d3677d15b4f331b2b87156dbf9d17 Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Wed, 7 Oct 2026 03:00:47 +0000
+Subject: [PATCH 2/2] Add 'nula' (push/void) bet result: stake returned,
+ excluded from win rate and ROI
+
+---
+ src/data/predictions.ts | 49 +++++++++++++++++++++++++++++++++++++----
+ src/pages/admin.astro   | 42 ++++++++++++++++++++++++++++++-----
+ src/pages/index.astro   | 36 +++++++++++++++++++++++++-----
+ src/pages/results.astro | 15 +++++++++++--
+ 4 files changed, 125 insertions(+), 17 deletions(-)
+
+diff --git a/src/data/predictions.ts b/src/data/predictions.ts
+index 0182441..13e10f5 100644
+--- a/src/data/predictions.ts
++++ b/src/data/predictions.ts
+@@ -7,7 +7,17 @@
+ // ============================================================
+ 
+ export type Confianza = 'ALTA' | 'MEDIA' | 'BAJA';
+-export type ResultadoApuesta = 'ganada' | 'perdida' | 'pendiente';
++/**
++ * Resultados posibles de una apuesta:
++ *  - 'ganada'   : la apuesta acertó
++ *  - 'perdida'  : la apuesta falló
++ *  - 'nula'     : push / void — el stake se devuelve íntegramente (0 U).
++ *                 Ocurre p. ej. en "Ganar sin empates" (Draw No Bet / Asian Goal Line)
++ *                 o en apuestas con hándicap cuando el resultado queda exactamente
++ *                 en el número del hándicap (hándicap asiático .0 / entero).
++ *  - 'pendiente': partido aún no se ha jugado o no se ha cerrado
++ */
++export type ResultadoApuesta = 'ganada' | 'perdida' | 'nula' | 'pendiente';
+ export type NivelCard = 'destacado' | 'secundario' | 'terciario';
+ 
+ export interface Administrador {
+@@ -205,6 +215,27 @@ export const apuestas: Apuesta[] = [
+     unidades: 0.5,
+     comentario: 'Apuesta de valor con stake reducido.',
+   },
++  // ---- Apuesta NULA (push/void): el stake se devuelve íntegramente ----
++  {
++    id: 9,
++    admin: '@andresr',
++    equipoLocal: 'Milan',
++    logoLocal: '/assets/logosEquipos/inter.png',
++    equipoVisitante: 'Roma',
++    logoVisitante: '/assets/logosEquipos/napoli.png',
++    liga: 'Serie A',
++    fecha: '2026-08-18',
++    hora: '18:00',
++    pronostico: 'Milan gana sin empates (Draw No Bet)',
++    tipoApuesta: 'Ganar sin empates / Hándicap asiático .0',
++    cuota: 1.75,
++    confianza: 'MEDIA',
++    nivel: 'terciario',
++    resultado: 'nula',
++    unidades: 1,
++    comentario:
++      'Empate 1-1 al final del partido: en "Ganar sin empates" la apuesta queda NULA y la casa devuelve el stake (0 U).',
++  },
+ ];
+ 
+ // ============================================================
+@@ -234,18 +265,27 @@ export function getHistorial(): Apuesta[] {
+   return [...apuestas].sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
+ }
+ 
+-/** Estadísticas de rendimiento general calculadas del historial cerrado. */
++/** Estadísticas de rendimiento general calculadas del historial cerrado.
++ *  Las apuestas NULAS (push/void) cuentan como cerradas, pero ni se ganan
++ *  ni se pierden: el stake se devuelve, por lo que no afectan al beneficio.
++ *  Se excluyen del Win Rate "efectivo" (solo ganadas vs perdidas). */
+ export function getRendimientoGeneral() {
+   const cerradas = apuestas.filter((a) => a.resultado !== 'pendiente');
+   const ganadas = cerradas.filter((a) => a.resultado === 'ganada');
+   const perdidas = cerradas.filter((a) => a.resultado === 'perdida');
++  const nulas = cerradas.filter((a) => a.resultado === 'nula');
+ 
+-  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
++  // Solo se arriesgan unidades en ganadas/perdidas; en nulas se devuelve el stake.
++  const apostado = ganadas
++    .concat(perdidas)
++    .reduce((acc, a) => acc + a.unidades, 0);
+   const ganado = ganadas.reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0);
+   const perdido = perdidas.reduce((acc, a) => acc + a.unidades, 0);
+   const beneficio = ganado - perdido;
+ 
+-  const winRate = cerradas.length ? (ganadas.length / cerradas.length) * 100 : 0;
++  // Win rate sobre decididas (sin contar nulas) — criterio estándar de la industria.
++  const decididas = ganadas.length + perdidas.length;
++  const winRate = decididas ? (ganadas.length / decididas) * 100 : 0;
+   const roi = apostado ? (beneficio / apostado) * 100 : 0;
+ 
+   return {
+@@ -253,6 +293,7 @@ export function getRendimientoGeneral() {
+     cerradas: cerradas.length,
+     ganadas: ganadas.length,
+     perdidas: perdidas.length,
++    nulas: nulas.length,
+     pendientes: apuestas.length - cerradas.length,
+     winRate,
+     roi,
+diff --git a/src/pages/admin.astro b/src/pages/admin.astro
+index 7a2ece1..5cad6b0 100644
+--- a/src/pages/admin.astro
++++ b/src/pages/admin.astro
+@@ -35,7 +35,7 @@ const logosDisponibles = [
+     </div>
+ 
+     <!-- Resumen rápido -->
+-    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
++    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+         <p class="text-xs uppercase tracking-wide text-slate-500">Picks totales</p>
+         <p class="mt-1 text-2xl font-bold text-white">{r.totalPronosticos}</p>
+@@ -44,11 +44,23 @@ const logosDisponibles = [
+         <p class="text-xs uppercase tracking-wide text-slate-500">Pendientes</p>
+         <p class="mt-1 text-2xl font-bold text-yellow-400">{r.pendientes}</p>
+       </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Ganadas</p>
++        <p class="mt-1 text-2xl font-bold text-green-500">{r.ganadas}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Perdidas</p>
++        <p class="mt-1 text-2xl font-bold text-red-500">{r.perdidas}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Nulas</p>
++        <p class="mt-1 text-2xl font-bold text-slate-300">{r.nulas}</p>
++      </div>
+       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+         <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
+         <p class="mt-1 text-2xl font-bold text-green-500">{r.winRate.toFixed(1)}%</p>
+       </div>
+-      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center col-span-2 sm:col-span-1">
+         <p class="text-xs uppercase tracking-wide text-slate-500">ROI</p>
+         <p class={`mt-1 text-2xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+           {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
+@@ -133,8 +145,22 @@ const logosDisponibles = [
+             </label>
+             <label class="block">
+               <span class="mb-1 block text-sm font-medium text-slate-300">Tipo de apuesta</span>
+-              <input name="tipoApuesta" type="text" required placeholder="Over/Under"
++              <input name="tipoApuesta" type="text" required list="tipos-apuesta" placeholder="Over/Under"
+                 class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++              <datalist id="tipos-apuesta">
++                <option value="Over/Under"></option>
++                <option value="Resultado (1X2)"></option>
++                <option value="Ganar sin empates (Draw No Bet)"></option>
++                <option value="Hándicap asiático"></option>
++                <option value="Hándicap europeo"></option>
++                <option value="Ambos marcan"></option>
++                <option value="Doble oportunidad"></option>
++                <option value="Resultado medio tiempo"></option>
++              </datalist>
++              <span class="mt-1 block text-xs text-slate-500">
++                "Ganar sin empates" y hándicaps pueden quedar <strong class="text-slate-400">NULAS</strong>:
++                se devuelve el stake (0 U).
++              </span>
+             </label>
+           </div>
+ 
+@@ -224,7 +250,9 @@ const logosDisponibles = [
+       <div class="border-b border-slate-800 p-5 sm:p-6">
+         <h2 class="text-xl font-bold text-white">Registro de partidos</h2>
+         <p class="mt-1 text-sm text-slate-400">
+-          Todas las apuestas registradas. Cambia el resultado a ganada/perdida cuando cierre el partido.
++          Todas las apuestas registradas. Cambia el resultado cuando cierre el partido:
++          ganada, perdida o <strong class="text-slate-300">nula</strong> (push/void — se devuelve
++          el stake, p. ej. en "Ganar sin empates" o hándicaps que quedan exactos).
+         </p>
+       </div>
+ 
+@@ -243,8 +271,12 @@ const logosDisponibles = [
+             <span class={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
+               a.resultado === 'ganada' ? 'border-green-500/30 bg-green-500/15 text-green-400'
+               : a.resultado === 'perdida' ? 'border-red-500/30 bg-red-500/15 text-red-400'
++              : a.resultado === 'nula' ? 'border-slate-500/30 bg-slate-500/15 text-slate-300'
+               : 'border-yellow-500/30 bg-yellow-500/15 text-yellow-400'}`}>
+-              {a.resultado === 'ganada' ? '✔ Ganada' : a.resultado === 'perdida' ? '✘ Perdida' : '⏳ Pendiente'}
++              {a.resultado === 'ganada' ? '✔ Ganada'
++                : a.resultado === 'perdida' ? '✘ Perdida'
++                : a.resultado === 'nula' ? '➖ Nula (stake devuelto)'
++                : '⏳ Pendiente'}
+             </span>
+           </li>
+         ))}
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index ba2867f..9245808 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -14,13 +14,17 @@ import {
+ const r = getRendimientoGeneral();
+ const fmt = (n: number, dec = 2) => n.toFixed(dec);
+ 
+-// Estadísticas por administrador (basadas en sus apuestas cerradas)
++// Estadísticas por administrador (basadas en sus apuestas cerradas).
++// Las NULAS (push/void) cuentan como cerradas pero no afectan beneficio ni win rate.
+ const adminsStats = administradores.map((adm) => {
+   const suyas = apuestas.filter((a) => a.admin === adm.apodo);
+   const cerradas = suyas.filter((a) => a.resultado !== 'pendiente');
+   const ganadas = cerradas.filter((a) => a.resultado === 'ganada').length;
+   const perdidas = cerradas.filter((a) => a.resultado === 'perdida').length;
+-  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
++  const nulas = cerradas.filter((a) => a.resultado === 'nula').length;
++  const apostado = suyas
++    .filter((a) => a.resultado === 'ganada' || a.resultado === 'perdida')
++    .reduce((acc, a) => acc + a.unidades, 0);
+   const beneficio =
+     ganadas
+       ? cerradas.filter((a) => a.resultado === 'ganada').reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0)
+@@ -29,8 +33,10 @@ const adminsStats = administradores.map((adm) => {
+     ? cerradas.filter((a) => a.resultado === 'perdida').reduce((acc, a) => acc + a.unidades, 0)
+     : 0;
+   const roi = apostado ? ((beneficio - perdidaU) / apostado) * 100 : 0;
+-  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, roi };
++  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, nulas, roi };
+ });
++// Apuestas decididas (ganadas + perdidas), sin contar nulas — base de las barras.
++const decididas = r.ganadas + r.perdidas;
+ ---
+ 
+ <Layout>
+@@ -103,7 +109,7 @@ const adminsStats = administradores.map((adm) => {
+             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
+               <div
+                 class="h-full rounded-full bg-green-500"
+-                style={`width: ${r.cerradas ? (r.ganadas / r.cerradas) * 100 : 0}%`}
++                style={`width: ${decididas ? (r.ganadas / decididas) * 100 : 0}%`}
+               ></div>
+             </div>
+           </div>
+@@ -116,10 +122,26 @@ const adminsStats = administradores.map((adm) => {
+             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
+               <div
+                 class="h-full rounded-full bg-red-500"
+-                style={`width: ${r.cerradas ? (r.perdidas / r.cerradas) * 100 : 0}%`}
++                style={`width: ${decididas ? (r.perdidas / decididas) * 100 : 0}%`}
+               ></div>
+             </div>
+           </div>
++
++          <div class="mt-4 flex-1">
++            <div class="flex justify-between text-sm mb-1">
++              <span class="text-slate-400 font-semibold">Nulas (stake devuelto)</span>
++              <span class="text-slate-300">{r.nulas}</span>
++            </div>
++            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
++              <div
++                class="h-full rounded-full bg-slate-500"
++                style={`width: ${r.cerradas ? (r.nulas / r.cerradas) * 100 : 0}%`}
++              ></div>
++            </div>
++            <p class="mt-2 text-xs text-slate-500">
++              Las nulas (push/void) no cuentan para el Win Rate ni el ROI: la casa devuelve lo apostado.
++            </p>
++          </div>
+         </div>
+ 
+         <div class="rounded-2xl border border-slate-800 p-5">
+@@ -128,7 +150,9 @@ const adminsStats = administradores.map((adm) => {
+             {adminsStats.map((s) => (
+               <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                 <span class="text-slate-300 font-medium">{s.apodo}</span>
+-                <span class="text-slate-400">{s.ganadas}G / {s.perdidas}P · {s.total} picks</span>
++                <span class="text-slate-400">
++                  {s.ganadas}G / {s.perdidas}P{s.nulas ? ` / ${s.nulas}N` : ''} · {s.total} picks
++                </span>
+                 <span class={`font-bold ${s.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                   {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}% ROI
+                 </span>
+diff --git a/src/pages/results.astro b/src/pages/results.astro
+index a9c54ef..434fd07 100644
+--- a/src/pages/results.astro
++++ b/src/pages/results.astro
+@@ -8,11 +8,13 @@ const r = getRendimientoGeneral();
+ const badgeResultado: Record<string, string> = {
+   ganada: 'bg-green-500/15 text-green-400 border-green-500/30',
+   perdida: 'bg-red-500/15 text-red-400 border-red-500/30',
++  nula: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
+   pendiente: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+ };
+ const textoResultado: Record<string, string> = {
+   ganada: '✔ Ganada',
+   perdida: '✘ Perdida',
++  nula: '➖ Nula (stake devuelto)',
+   pendiente: '⏳ Pendiente',
+ };
+ ---
+@@ -28,7 +30,8 @@ const textoResultado: Record<string, string> = {
+         </h1>
+         <p class="mt-2 max-w-xl text-sm sm:text-base text-slate-400">
+           Registro completo de las apuestas deportivas publicadas por nuestros
+-          administradores. Transparencia total: ganadas, perdidas y pendientes.
++          administradores. Transparencia total: ganadas, perdidas, nulas (stake devuelto)
++          y pendientes.
+         </p>
+       </div>
+ 
+@@ -41,7 +44,7 @@ const textoResultado: Record<string, string> = {
+     </div>
+ 
+     <!-- Resumen rápido -->
+-    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
++    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+         <p class="text-xs uppercase tracking-wide text-slate-500">Totales</p>
+         <p class="mt-1 text-2xl font-bold text-white">{r.cerradas + r.pendientes}</p>
+@@ -54,6 +57,14 @@ const textoResultado: Record<string, string> = {
+         <p class="text-xs uppercase tracking-wide text-slate-500">Perdidas</p>
+         <p class="mt-1 text-2xl font-bold text-red-500">{r.perdidas}</p>
+       </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Nulas</p>
++        <p class="mt-1 text-2xl font-bold text-slate-300">{r.nulas}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Pendientes</p>
++        <p class="mt-1 text-2xl font-bold text-yellow-400">{r.pendientes}</p>
++      </div>
+       <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
+         <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
+         <p class="mt-1 text-2xl font-bold text-white">{r.winRate.toFixed(1)}%</p>
+-- 
+2.39.5
+

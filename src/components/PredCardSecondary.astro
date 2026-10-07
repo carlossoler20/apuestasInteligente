@@ -1,0 +1,70 @@
+---
+import { formatearFecha } from '../data/predictions';
+import type { Apuesta } from '../data/predictions';
+
+interface Props {
+  apuesta: Apuesta;
+  /** Color de acento: "sky" | "purple" */
+  acento?: 'sky' | 'purple';
+}
+
+const { apuesta, acento = 'sky' } = Astro.props;
+const a = apuesta;
+
+const accentText = acento === 'sky' ? 'text-sky-500' : 'text-purple-500';
+const barras = a.confianza === 'ALTA' ? 3 : a.confianza === 'MEDIA' ? 2 : 1;
+---
+
+<div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-[#07111d] via-[#091726] to-[#07111d] shadow-lg">
+  <div class="flex flex-col p-5">
+
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+      <span class={`text-sm font-bold uppercase tracking-wide ${accentText}`}>
+        {a.nivel === 'secundario' ? 'Secundario' : 'Terciario'}
+      </span>
+      <span class="text-xs text-slate-500">
+        por <strong class="text-slate-300">{a.admin}</strong>
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-6 items-center justify-around md:flex-row">
+
+      <div class="min-w-0">
+        <div class="flex items-center justify-center gap-4">
+          <img src={a.logoLocal} alt={a.equipoLocal} class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-contain" />
+          <span class="text-lg font-semibold text-white">VS</span>
+          <img src={a.logoVisitante} alt={a.equipoVisitante} class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-contain" />
+        </div>
+
+        <div class="mt-5 text-center">
+          <h3 class="text-xl font-semibold text-white">{a.equipoLocal} vs {a.equipoVisitante}</h3>
+          <p class="mt-2 text-sm text-slate-400">{a.liga} • {formatearFecha(a.fecha)} • {a.hora}</p>
+        </div>
+      </div>
+
+      <div class="min-w-0 text-center md:text-left">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white break-words">{a.pronostico}</h2>
+        <p class="mt-2 text-sm uppercase tracking-wide text-slate-500">{a.tipoApuesta}</p>
+
+        <div class="mt-5 flex items-center justify-center md:justify-start gap-3">
+          <span class={`font-semibold ${accentText}`}>Confianza: {a.confianza}</span>
+          <div class="flex items-end gap-1" aria-hidden="true">
+            {Array.from({ length: barras }).map(() => (
+              <div class={`h-7 w-2 rounded ${acento === 'sky' ? 'bg-sky-500' : 'bg-purple-500'}`}></div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="min-w-0 text-center md:text-left">
+        <p class="text-sm uppercase text-slate-500">Cuota</p>
+        <p class="text-4xl sm:text-5xl font-bold text-green-500">{a.cuota.toFixed(2)}</p>
+
+        <a href="#picks" class="mt-3 inline-block font-semibold text-green-500 hover:text-green-400 active:text-green-400">
+          Ver análisis →
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
