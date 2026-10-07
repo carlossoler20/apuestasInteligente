@@ -1,61 +1,38 @@
-# Instrucciones para subir los cambios al repositorio privado
+# Push Request — feat/admin-apuestas-results
 
-## Opción A: Usando GitHub CLI (recomendada)
+## Situación del sandbox (verificada 2026-10-07)
+- El repo remoto es ACCESIBLE (clonado sin problemas), pero GitHub exige autenticación para escribir: este entorno NO tiene credenciales, por lo que el push debe hacerse desde tu máquina o con un token.
+- IMPORTANTE: en GitHub ya se fusionó el PR #1 (responsive). Las ramas locales antiguas de este sandbox quedaron obsoletas (contenían node_modules/dist y no partían del main actualizado).
+- Se construyó una rama NUEVA Y LIMPIA `feat/admin-apuestas-results` basada en el main actual de GitHub, con 2 commits que representan exactamente la funcionalidad pedida. Los parches están VERIFICADOS: aplicados sobre un clon fresco del repo → `git am` sin conflictos y código resultante idéntico byte a byte al trabajo final del sandbox.
 
+## Archivos listos en /workspace
+- 0001-Add-admin-panel-for-registering-bets-match-history-a.patch (52 KB)
+- 0002-Add-nula-push-void-bet-result-stake-returned-exclude.patch (17 KB)
+
+## Comandos para crear el PR (desde tu computadora)
 ```bash
-# 1. Autenticarte con gh (solo la primera vez)
-gh auth login
-
-# 2. Crear una rama nueva desde main
-git checkout -b feat/admin-apuestas-results main
-
-# 3. Aplicar el parche generado en este sandbox
-git am < apuestas-feature.patch
-
-# 4. Subir la rama al remoto (repo privado)
+cd apuestasInteligente
+git checkout -b feat/admin-apuestas-results origin/main
+git am < 0001-Add-admin-panel-for-registering-bets-match-history-a.patch
+git am < 0002-Add-nula-push-void-bet-result-stake-returned-exclude.patch
 git push -u origin feat/admin-apuestas-results
-
-# 5. Crear el Pull Request automáticamente
 gh pr create --base main \
   --title "feat: panel admin de apuestas, historial /results y rendimiento general" \
-  --body "## Cambios principales
-- Fuente de datos compartida src/data/predictions.ts (apuestas, administradores, nulas/push)
-- /admin: registro de apuestas con múltiples administradores (nombre + apodo)
-- /results: historial público de partidos (tabla en desktop, cards en móvil)
-- Inicio: sección de rendimiento general dinámica (ROI, win rate, nulas)
-- Soporte de apuestas NULAS (Draw No Bet / handicaps): stake devuelto, excluidas del win rate y ROI
-- Mejoras responsive: viewport, tipografías fluidas (clamp), NavBar/Hero/tarjetas optimizadas para móvil
-- Accesibilidad táctil: botones convertidos en enlaces, targets >44px
-
-## Archivos modificados (18 archivos, +1308 líneas)
-src/components/: FeaturesBar, Footer, Hero, MainCard, MainLeagues, NavBar, PicksSection, PredCardFeatured, PredCardSecondary, SecondCard, SectionBlog, TertiaryCard
-src/data/predictions.ts (nuevo)
-src/layouts/Layout.astro
-src/pages/: admin.astro (nuevo), index.astro, results.astro (nuevo)
-src/styles/global.css
-
-## Nota técnica
-Sitio estático Astro: los formularios de /admin guardan borradores en localStorage; para publicar definitivamente se añade la entrada a src/data/predictions.ts (todo centralizado en un solo lugar). Siguiente paso opcional: conectar a backend/CMS (Sanity, Supabase, etc.)."
+  --body "- Fuente de datos compartida src/data/predictions.ts (apuestas, administradores, nulas/push)
+- /admin: registro de apuestas con múltiples administradores + tabla de partidos
+- /results: historial público (tabla desktop / cards móvil)
+- Inicio: rendimiento general dinámico (ROI, win rate, nulas excluidas)
+- Apuestas NULAS (Draw No Bet / handicaps): stake devuelto, excluidas de métricas"
 ```
+(Alternativa sin gh: tras el push, abrir el enlace https://github.com/carlossoler20/apuestasInteligente/pull/new/feat/admin-apuestas-results)
 
-## Opción B: Desde el navegador tras hacer push
+## Alternativa con token (para que el sandbox haga el push)
+Proporciona un Personal Access Token con scope `repo` y ejecutaré:
+git push https://x-access-token:<TOKEN>@github.com/carlossoler20/apuestasInteligente.git feat/admin-apuestas-results
 
-```bash
-# Pasos 1–4 idénticos a Opción A, luego:
-git push -u origin feat/admin-apuestas-results
-```
-GitHub mostrará en la terminal un enlace directo:
-```
-remote: Create a pull request for 'feat/admin-apuestas-results' on GitHub by visiting:
-remote:      https://github.com/carlossoler20/apuestasInteligente/pull/new/feat/admin-apuestas-results
-```
-Entra a ese enlace, revisa los commits y pulsa **"Create pull request"**.
+## Contenido de los commits
+### Commit 1: Admin + Results + Rendimiento
+src/data/predictions.ts (nuevo, 312 líneas), src/pages/admin.astro (nuevo, ~346), src/pages/results.astro, src/components/PicksSection.astro, PredCardFeatured.astro, PredCardSecondary.astro, Hero.astro, NavBar.astro, index.astro.
 
----
-
-### Verificación previa (ya realizada en el sandbox)
-✅ El parche `apuestas-feature.patch` (96 KB) contiene 4 commits limpios sobre `main`.  
-✅ Se probó aplicar el parche en un clon temporal: todas las páginas (`admin.astro`, `results.astro`) y componentes quedaron presentes.  
-✅ Los 10,655 archivos de `node_modules/` y `dist/` **no están incluidos** en el parche (excluidos correctamente por `.gitignore`).  
-
-El archivo `apuestas-feature.patch` está listo en `/workspace/apuestas-feature.patch` para copiarlo a tu computadora.
+### Commit 2: Apuestas NULAS (push/void)
+ResultadoApuesta += 'nula'; ejemplo Draw No Bet; win rate sobre decididas; ROI/stake devuelto; badges ➖ en admin/results/inicio; desglose por admin con nulas.

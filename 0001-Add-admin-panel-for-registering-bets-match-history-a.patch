@@ -1,0 +1,1199 @@
+From fe0efb5c8847114740840df9cae09a9e117b3c2f Mon Sep 17 00:00:00 2001
+From: "qwen.ai[bot]" <qwenlm-intl@service.alibaba.com>
+Date: Wed, 7 Oct 2026 03:00:46 +0000
+Subject: [PATCH 1/2] Add admin panel for registering bets, match history at
+ /results, and dynamic performance section on home
+
+---
+ src/components/Hero.astro              |  14 +-
+ src/components/NavBar.astro            |   2 +
+ src/components/PicksSection.astro      |  40 ++++
+ src/components/PredCardFeatured.astro  |  76 ++++++
+ src/components/PredCardSecondary.astro |  70 ++++++
+ src/data/predictions.ts                | 271 +++++++++++++++++++++
+ src/pages/admin.astro                  | 314 +++++++++++++++++++++++++
+ src/pages/index.astro                  | 143 +++++++++--
+ src/pages/results.astro                | 149 ++++++++++++
+ 9 files changed, 1055 insertions(+), 24 deletions(-)
+ create mode 100644 src/components/PicksSection.astro
+ create mode 100644 src/components/PredCardFeatured.astro
+ create mode 100644 src/components/PredCardSecondary.astro
+ create mode 100644 src/data/predictions.ts
+ create mode 100644 src/pages/admin.astro
+
+diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+index 12e72d1..73731e0 100644
+--- a/src/components/Hero.astro
++++ b/src/components/Hero.astro
+@@ -21,17 +21,19 @@
+ 
+       <div class="mt-8 flex flex-col gap-4 sm:flex-row">
+ 
+-        <button
+-          class="w-full sm:w-auto rounded-xl bg-green-500 px-6 py-4 font-semibold text-black transition hover:bg-green-400 active:bg-green-400"
++        <a
++          href="/#picks"
++          class="w-full sm:w-auto text-center rounded-xl bg-green-500 px-6 py-4 font-semibold text-black transition hover:bg-green-400 active:bg-green-400"
+         >
+           Ver pronósticos
+-        </button>
++        </a>
+ 
+-        <button
+-          class="w-full sm:w-auto rounded-xl border border-slate-700 px-6 py-4 font-semibold text-white transition hover:border-slate-500 active:border-slate-500"
++        <a
++          href="/results"
++          class="w-full sm:w-auto text-center rounded-xl border border-slate-700 px-6 py-4 font-semibold text-white transition hover:border-slate-500 active:border-slate-500"
+         >
+           Ver resultados
+-        </button>
++        </a>
+ 
+       </div>
+ 
+diff --git a/src/components/NavBar.astro b/src/components/NavBar.astro
+index 413ca17..5c42adc 100644
+--- a/src/components/NavBar.astro
++++ b/src/components/NavBar.astro
+@@ -18,6 +18,7 @@ import logo from '../assets/logof.png';
+                 <li><a href="/results" class="hover:text-verde-claro active:text-verde-claro transition">Resultados</a></li>
+                 <li><a href="/blog" class="hover:text-verde-claro active:text-verde-claro transition">Blog</a></li>
+                 <li><a href="/contact" class="hover:text-verde-claro active:text-verde-claro transition">Contacto</a></li>
++                <li><a href="/admin" class="rounded-md border border-green-500/40 px-3 py-1 text-green-400 hover:bg-green-500/10 active:bg-green-500/10 transition">Admin</a></li>
+             </ul>
+ 
+             <!-- Hamburger Button Mobile -->
+@@ -43,6 +44,7 @@ import logo from '../assets/logof.png';
+             <li><a href="/results" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Resultados</a></li>
+             <li><a href="/blog" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Blog</a></li>
+             <li><a href="/contact" class="block px-3 py-3 rounded-md hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Contacto</a></li>
++            <li><a href="/admin" class="block px-3 py-3 rounded-md text-green-400 hover:bg-[#0B3D2E] active:bg-[#0B3D2E] transition touch-manipulation">Admin</a></li>
+         </ul>
+     </div>
+ </nav>
+diff --git a/src/components/PicksSection.astro b/src/components/PicksSection.astro
+new file mode 100644
+index 0000000..36e99fc
+--- /dev/null
++++ b/src/components/PicksSection.astro
+@@ -0,0 +1,40 @@
++---
++import { getApuestasActivas } from '../data/predictions';
++import PredCardFeatured from './PredCardFeatured.astro';
++import PredCardSecondary from './PredCardSecondary.astro';
++
++const activas = getApuestasActivas();
++const destacada = activas.find((a) => a.nivel === 'destacado') ?? activas[0];
++const secundarias = activas.filter((a) => a !== destacada && a.nivel === 'secundario').slice(0, 2);
++const terciarias = activas
++  .filter((a) => a !== destacada && !secundarias.includes(a))
++  .slice(0, 3);
++---
++
++<section class="mb-8" id="picks">
++  <div class="mb-6 flex flex-wrap items-end justify-between gap-2">
++    <h2 class="text-2xl font-bold text-white sm:text-3xl">Pronósticos del día</h2>
++    <p class="text-sm text-slate-400">
++      Registrados por nuestro equipo de analistas · <a href="/admin" class="text-green-500 hover:text-green-400">Panel admin</a>
++    </p>
++  </div>
++
++  {destacada && <PredCardFeatured apuesta={destacada} />}
++
++  {secundarias.length > 0 && (
++    <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
++      {secundarias.map((apuesta) => (
++        <PredCardSecondary apuesta={apuesta} acento="sky" />
++      ))}
++    </div>
++  )}
++
++  {terciarias.length > 0 && (
++    <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 pb-5">
++      {terciarias.map((apuesta) => (
++        <PredCardSecondary apuesta={apuesta} acento="purple" />
++      ))}
++    </div>
++  )}
++</section>
++
+diff --git a/src/components/PredCardFeatured.astro b/src/components/PredCardFeatured.astro
+new file mode 100644
+index 0000000..0d02043
+--- /dev/null
++++ b/src/components/PredCardFeatured.astro
+@@ -0,0 +1,76 @@
++---
++import { formatearFecha } from '../data/predictions';
++import type { Apuesta } from '../data/predictions';
++
++interface Props {
++  apuesta: Apuesta;
++}
++
++const { apuesta } = Astro.props;
++const a = apuesta;
++
++const barrasConfianza: Record<string, number> = { ALTA: 3, MEDIA: 2, BAJA: 1 };
++const barras = barrasConfianza[a.confianza] ?? 1;
++---
++
++<div class="w-full max-w-6xl mx-auto">
++  <div
++    class="relative overflow-hidden rounded-2xl border border-green-500/40 bg-gradient-to-r from-[#07121f] via-[#081524] to-[#07121f] p-4 md:p-6"
++  >
++    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
++
++      <!-- Partido -->
++      <div class="flex flex-col gap-4 min-w-0 lg:w-1/3">
++        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-green-400 text-xs font-semibold uppercase">
++          <span class="inline-flex items-center gap-2">⭐ Pronóstico destacado</span>
++          <span class="text-slate-500 normal-case">por <strong class="text-slate-300">{a.admin}</strong></span>
++        </div>
++
++        <div class="flex items-center justify-center gap-3 sm:gap-4">
++          <img src={a.logoLocal} alt={a.equipoLocal} class="h-12 w-12 sm:h-14 sm:w-14 md:h-20 md:w-20 object-contain" />
++          <span class="text-white font-bold text-lg">VS</span>
++          <img src={a.logoVisitante} alt={a.equipoVisitante} class="h-12 w-12 sm:h-14 sm:w-14 md:h-20 md:w-20 object-contain" />
++        </div>
++
++        <div class="text-center lg:text-left">
++          <h3 class="text-white font-semibold text-lg">{a.equipoLocal} vs {a.equipoVisitante}</h3>
++          <p class="text-gray-400 text-sm mt-1">{a.liga} • {formatearFecha(a.fecha)} • {a.hora}</p>
++        </div>
++      </div>
++
++      <!-- Separador Desktop -->
++      <div class="hidden lg:block h-24 w-px bg-white/10"></div>
++
++      <!-- Pronóstico -->
++      <div class="min-w-0 text-center lg:text-left lg:w-1/3">
++        <h2 class="text-white text-2xl md:text-3xl font-bold break-words">{a.pronostico}</h2>
++        <p class="text-gray-500 uppercase text-xs tracking-wider mt-2">{a.tipoApuesta}</p>
++
++        <div class="mt-4 inline-flex items-center gap-3 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-2">
++          <span class="text-green-400 font-medium">Confianza: {a.confianza}</span>
++          <div class="flex items-end gap-1" aria-hidden="true">
++            {Array.from({ length: barras }).map(() => (
++              <span class="w-2 h-7 bg-green-500 rounded"></span>
++            ))}
++          </div>
++        </div>
++      </div>
++
++      <!-- Separador Desktop -->
++      <div class="hidden lg:block h-24 w-px bg-white/10"></div>
++
++      <!-- Cuota -->
++      <div class="min-w-0 text-center lg:w-1/4">
++        <p class="text-gray-500 uppercase text-xs tracking-wider">Cuota</p>
++        <div class="text-green-400 text-4xl sm:text-5xl font-bold mt-2">{a.cuota.toFixed(2)}</div>
++
++        <button
++          class="text-sm sm:text-xs mt-4 w-full lg:w-auto rounded-xl bg-green-500 px-6 sm:px-8 py-3 font-semibold text-black transition hover:bg-green-400 active:bg-green-400"
++        >
++          {a.comentario} ¡Apuesta ahora!
++        </button>
++      </div>
++
++    </div>
++  </div>
++</div>
+diff --git a/src/components/PredCardSecondary.astro b/src/components/PredCardSecondary.astro
+new file mode 100644
+index 0000000..0e91797
+--- /dev/null
++++ b/src/components/PredCardSecondary.astro
+@@ -0,0 +1,70 @@
++---
++import { formatearFecha } from '../data/predictions';
++import type { Apuesta } from '../data/predictions';
++
++interface Props {
++  apuesta: Apuesta;
++  /** Color de acento: "sky" | "purple" */
++  acento?: 'sky' | 'purple';
++}
++
++const { apuesta, acento = 'sky' } = Astro.props;
++const a = apuesta;
++
++const accentText = acento === 'sky' ? 'text-sky-500' : 'text-purple-500';
++const barras = a.confianza === 'ALTA' ? 3 : a.confianza === 'MEDIA' ? 2 : 1;
++---
++
++<div class="w-full overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-[#07111d] via-[#091726] to-[#07111d] shadow-lg">
++  <div class="flex flex-col p-5">
++
++    <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
++      <span class={`text-sm font-bold uppercase tracking-wide ${accentText}`}>
++        {a.nivel === 'secundario' ? 'Secundario' : 'Terciario'}
++      </span>
++      <span class="text-xs text-slate-500">
++        por <strong class="text-slate-300">{a.admin}</strong>
++      </span>
++    </div>
++
++    <div class="flex flex-col gap-6 items-center justify-around md:flex-row">
++
++      <div class="min-w-0">
++        <div class="flex items-center justify-center gap-4">
++          <img src={a.logoLocal} alt={a.equipoLocal} class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-contain" />
++          <span class="text-lg font-semibold text-white">VS</span>
++          <img src={a.logoVisitante} alt={a.equipoVisitante} class="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-contain" />
++        </div>
++
++        <div class="mt-5 text-center">
++          <h3 class="text-xl font-semibold text-white">{a.equipoLocal} vs {a.equipoVisitante}</h3>
++          <p class="mt-2 text-sm text-slate-400">{a.liga} • {formatearFecha(a.fecha)} • {a.hora}</p>
++        </div>
++      </div>
++
++      <div class="min-w-0 text-center md:text-left">
++        <h2 class="text-2xl sm:text-3xl font-bold text-white break-words">{a.pronostico}</h2>
++        <p class="mt-2 text-sm uppercase tracking-wide text-slate-500">{a.tipoApuesta}</p>
++
++        <div class="mt-5 flex items-center justify-center md:justify-start gap-3">
++          <span class={`font-semibold ${accentText}`}>Confianza: {a.confianza}</span>
++          <div class="flex items-end gap-1" aria-hidden="true">
++            {Array.from({ length: barras }).map(() => (
++              <div class={`h-7 w-2 rounded ${acento === 'sky' ? 'bg-sky-500' : 'bg-purple-500'}`}></div>
++            ))}
++          </div>
++        </div>
++      </div>
++
++      <div class="min-w-0 text-center md:text-left">
++        <p class="text-sm uppercase text-slate-500">Cuota</p>
++        <p class="text-4xl sm:text-5xl font-bold text-green-500">{a.cuota.toFixed(2)}</p>
++
++        <a href="#picks" class="mt-3 inline-block font-semibold text-green-500 hover:text-green-400 active:text-green-400">
++          Ver análisis →
++        </a>
++      </div>
++
++    </div>
++  </div>
++</div>
+diff --git a/src/data/predictions.ts b/src/data/predictions.ts
+new file mode 100644
+index 0000000..0182441
+--- /dev/null
++++ b/src/data/predictions.ts
+@@ -0,0 +1,271 @@
++// ============================================================
++// Datos de apuestas deportivas (registro de partidos)
++// ------------------------------------------------------------
++// Este archivo es la "fuente de datos" que alimentan los
++// administradores desde /admin. Las cards del inicio y el
++// historial de /results leen de aquí.
++// ============================================================
++
++export type Confianza = 'ALTA' | 'MEDIA' | 'BAJA';
++export type ResultadoApuesta = 'ganada' | 'perdida' | 'pendiente';
++export type NivelCard = 'destacado' | 'secundario' | 'terciario';
++
++export interface Administrador {
++  nombre: string;
++  apodo: string; // p. ej. "@analista1" — se muestra como autor en las cards
++}
++
++/** Lista de administradores registrados. Añade tantos como necesites. */
++export const administradores: Administrador[] = [
++  { nombre: 'Carlos Méndez', apodo: '@carlosm' },
++  { nombre: 'Laura Gómez', apodo: '@laurag' },
++  { nombre: 'Andrés Ríos', apodo: '@andresr' },
++];
++
++export interface Apuesta {
++  id: number;
++  /** Apodo del administrador que registró la apuesta */
++  admin: string;
++  /** Nombre del equipo local */
++  equipoLocal: string;
++  /** Ruta del logo del equipo local (debe existir en public/assets/logosEquipos) */
++  logoLocal: string;
++  equipoVisitante: string;
++  logoVisitante: string;
++  liga: string;
++  fecha: string; // ISO: AAAA-MM-DD
++  hora: string; // "HH:MM"
++  pronostico: string; // p. ej. "Más de 2.5 goles"
++  tipoApuesta: string; // p. ej. "Over/Under"
++  cuota: number;
++  confianza: Confianza;
++  nivel: NivelCard; // cómo se muestra en el inicio
++  resultado: ResultadoApuesta;
++  unidades: number; // stake en unidades (p. ej. 1, 2, 0.5)
++  comentario: string;
++}
++
++/** Registro completo de apuestas. Edita/añade entradas desde /admin. */
++export const apuestas: Apuesta[] = [
++  // ---- Destacada (card principal del inicio) ----
++  {
++    id: 1,
++    admin: '@carlosm',
++    equipoLocal: 'Real Madrid',
++    logoLocal: '/assets/logosEquipos/RM.png',
++    equipoVisitante: 'Real Betis',
++    logoVisitante: '/assets/logosEquipos/RB.png',
++    liga: 'LaLiga',
++    fecha: '2026-10-10',
++    hora: '16:00',
++    pronostico: 'Más de 2.5 goles',
++    tipoApuesta: 'Over/Under',
++    cuota: 1.85,
++    confianza: 'ALTA',
++    nivel: 'destacado',
++    resultado: 'pendiente',
++    unidades: 2,
++    comentario:
++      'Ambos equipos llegan con toda su ofensiva, se espera un partido con muchos goles.',
++  },
++
++  // ---- Secundarias ----
++  {
++    id: 2,
++    admin: '@laurag',
++    equipoLocal: 'Inter',
++    logoLocal: '/assets/logosEquipos/inter.png',
++    equipoVisitante: 'Napoli',
++    logoVisitante: '/assets/logosEquipos/napoli.png',
++    liga: 'Serie A',
++    fecha: '2026-10-10',
++    hora: '20:45',
++    pronostico: 'Inter gana',
++    tipoApuesta: 'Resultado (1X2)',
++    cuota: 1.95,
++    confianza: 'MEDIA',
++    nivel: 'secundario',
++    resultado: 'pendiente',
++    unidades: 1,
++    comentario: 'El Inter está invicto en casa esta temporada.',
++  },
++  {
++    id: 3,
++    admin: '@andresr',
++    equipoLocal: 'Arsenal',
++    logoLocal: '/assets/logosEquipos/arsenal.png',
++    equipoVisitante: 'Chelsea',
++    logoVisitante: '/assets/logosEquipos/chelsea.png',
++    liga: 'Premier League',
++    fecha: '2026-10-11',
++    hora: '17:00',
++    pronostico: 'Más de 1.5 goles',
++    tipoApuesta: 'Over/Under',
++    cuota: 1.4,
++    confianza: 'ALTA',
++    nivel: 'terciario',
++    resultado: 'pendiente',
++    unidades: 1.5,
++    comentario: 'Los derbis londinenses casi siempre tienen goles.',
++  },
++
++  // ---- Historial cerrado (se ve en /results) ----
++  {
++    id: 4,
++    admin: '@carlosm',
++    equipoLocal: 'Real Madrid',
++    logoLocal: '/assets/logosEquipos/RM.png',
++    equipoVisitante: 'Barcelona',
++    logoVisitante: '/assets/logosEquipos/RB.png',
++    liga: 'LaLiga',
++    fecha: '2026-09-20',
++    hora: '18:15',
++    pronostico: 'Ambos marcan: Sí',
++    tipoApuesta: 'Ambos marcan',
++    cuota: 1.72,
++    confianza: 'ALTA',
++    nivel: 'terciario',
++    resultado: 'ganada',
++    unidades: 2,
++    comentario: 'Clásico con delanteros en racha.',
++  },
++  {
++    id: 5,
++    admin: '@laurag',
++    equipoLocal: 'Inter',
++    logoLocal: '/assets/logosEquipos/inter.png',
++    equipoVisitante: 'Juventus',
++    logoVisitante: '/assets/logosEquipos/napoli.png',
++    liga: 'Serie A',
++    fecha: '2026-09-15',
++    hora: '20:45',
++    pronostico: 'Menos de 2.5 goles',
++    tipoApuesta: 'Over/Under',
++    cuota: 1.65,
++    confianza: 'MEDIA',
++    nivel: 'terciario',
++    resultado: 'perdida',
++    unidades: 1,
++    comentario: 'Derbi italiano cerrado… hasta el minuto 88.',
++  },
++  {
++    id: 6,
++    admin: '@andresr',
++    equipoLocal: 'Arsenal',
++    logoLocal: '/assets/logosEquipos/arsenal.png',
++    equipoVisitante: 'Liverpool',
++    logoVisitante: '/assets/logosEquipos/chelsea.png',
++    liga: 'Premier League',
++    fecha: '2026-09-08',
++    hora: '17:30',
++    pronostico: 'Arsenal no pierde',
++    tipoApuesta: 'Doble oportunidad',
++    cuota: 1.48,
++    confianza: 'ALTA',
++    nivel: 'secundario',
++    resultado: 'ganada',
++    unidades: 2,
++    comentario: 'Los Gunners sólidos en casa.',
++  },
++  {
++    id: 7,
++    admin: '@carlosm',
++    equipoLocal: 'Napoli',
++    logoLocal: '/assets/logosEquipos/napoli.png',
++    equipoVisitante: 'Milan',
++    logoVisitante: '/assets/logosEquipos/inter.png',
++    liga: 'Serie A',
++    fecha: '2026-08-30',
++    hora: '20:45',
++    pronostico: 'Más de 2.5 goles',
++    tipoApuesta: 'Over/Under',
++    cuota: 1.9,
++    confianza: 'MEDIA',
++    nivel: 'terciario',
++    resultado: 'ganada',
++    unidades: 1,
++    comentario: 'Partido abierto entre dos equipos ofensivos.',
++  },
++  {
++    id: 8,
++    admin: '@laurag',
++    equipoLocal: 'Chelsea',
++    logoLocal: '/assets/logosEquipos/chelsea.png',
++    equipoVisitante: 'Tottenham',
++    logoVisitante: '/assets/logosEquipos/arsenal.png',
++    liga: 'Premier League',
++    fecha: '2026-08-25',
++    hora: '12:30',
++    pronostico: 'Empate al descanso',
++    tipoApuesta: 'Resultado medio tiempo',
++    cuota: 2.1,
++    confianza: 'BAJA',
++    nivel: 'terciario',
++    resultado: 'perdida',
++    unidades: 0.5,
++    comentario: 'Apuesta de valor con stake reducido.',
++  },
++];
++
++// ============================================================
++// Helpers
++// ============================================================
++
++const CONFIANZA_ORDEN: Record<Confianza, number> = { ALTA: 3, MEDIA: 2, BAJA: 1 };
++
++/** Apuestas activas (pendientes) ordenadas por nivel y confianza. */
++export function getApuestasActivas(): Apuesta[] {
++  const ordenNivel: Record<NivelCard, number> = {
++    destacado: 0,
++    secundario: 1,
++    terciario: 2,
++  };
++  return apuestas
++    .filter((a) => a.resultado === 'pendiente')
++    .sort(
++      (a, b) =>
++        ordenNivel[a.nivel] - ordenNivel[b.nivel] ||
++        CONFIANZA_ORDEN[b.confianza] - CONFIANZA_ORDEN[a.confianza],
++    );
++}
++
++/** Historial completo ordenado por fecha (más reciente primero). */
++export function getHistorial(): Apuesta[] {
++  return [...apuestas].sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
++}
++
++/** Estadísticas de rendimiento general calculadas del historial cerrado. */
++export function getRendimientoGeneral() {
++  const cerradas = apuestas.filter((a) => a.resultado !== 'pendiente');
++  const ganadas = cerradas.filter((a) => a.resultado === 'ganada');
++  const perdidas = cerradas.filter((a) => a.resultado === 'perdida');
++
++  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
++  const ganado = ganadas.reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0);
++  const perdido = perdidas.reduce((acc, a) => acc + a.unidades, 0);
++  const beneficio = ganado - perdido;
++
++  const winRate = cerradas.length ? (ganadas.length / cerradas.length) * 100 : 0;
++  const roi = apostado ? (beneficio / apostado) * 100 : 0;
++
++  return {
++    totalPronosticos: apuestas.length,
++    cerradas: cerradas.length,
++    ganadas: ganadas.length,
++    perdidas: perdidas.length,
++    pendientes: apuestas.length - cerradas.length,
++    winRate,
++    roi,
++    beneficio,
++  };
++}
++
++/** Formatea "2026-10-10" -> "10 Oct 2026" */
++export function formatearFecha(iso: string): string {
++  const meses = [
++    'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
++    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
++  ];
++  const [y, m, d] = iso.split('-').map(Number);
++  return `${d} ${meses[m - 1]} ${y}`;
++}
+diff --git a/src/pages/admin.astro b/src/pages/admin.astro
+new file mode 100644
+index 0000000..7a2ece1
+--- /dev/null
++++ b/src/pages/admin.astro
+@@ -0,0 +1,314 @@
++---
++import Layout from '../layouts/Layout.astro';
++import {
++  apuestas,
++  administradores,
++  getRendimientoGeneral,
++  formatearFecha,
++} from '../data/predictions';
++import type { Apuesta } from '../data/predictions';
++
++const r = getRendimientoGeneral();
++const registro: Apuesta[] = [...apuestas].sort((a, b) => b.id - a.id);
++const logosDisponibles = [
++  'RM.png', 'RB.png', 'arsenal.png', 'chelsea.png', 'inter.png', 'napoli.png',
++];
++---
++
++<Layout>
++  <section class="py-8 sm:py-12">
++
++    <!-- Encabezado -->
++    <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
++      <div>
++        <h1 class="text-[clamp(1.75rem,5vw,2.5rem)] font-bold text-white">
++          Panel de administración
++        </h1>
++        <p class="mt-2 max-w-xl text-sm sm:text-base text-slate-400">
++          Registra las apuestas deportivas que se muestran en las cards del inicio
++          y alimentan el historial de <a href="/results" class="text-green-500 hover:text-green-400">/results</a>.
++        </p>
++      </div>
++      <span class="inline-flex w-fit items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-xs font-semibold text-yellow-400">
++        🔒 Acceso restringido a administradores
++      </span>
++    </div>
++
++    <!-- Resumen rápido -->
++    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Picks totales</p>
++        <p class="mt-1 text-2xl font-bold text-white">{r.totalPronosticos}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Pendientes</p>
++        <p class="mt-1 text-2xl font-bold text-yellow-400">{r.pendientes}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
++        <p class="mt-1 text-2xl font-bold text-green-500">{r.winRate.toFixed(1)}%</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">ROI</p>
++        <p class={`mt-1 text-2xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
++          {r.roi >= 0 ? '+' : ''}{r.roi.toFixed(1)}%
++        </p>
++      </div>
++    </div>
++
++    <div class="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
++
++      <!-- ===== Formulario para registrar apuesta ===== -->
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/80 p-5 sm:p-6">
++        <h2 class="text-xl font-bold text-white">Registrar nueva apuesta</h2>
++        <p class="mt-1 text-sm text-slate-400">
++          Al publicarse aparecerá en la card correspondiente del inicio y en el historial de resultados.
++        </p>
++
++        <form id="form-apuesta" class="mt-6 space-y-4">
++
++          <div class="grid gap-4 sm:grid-cols-2">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Administrador</span>
++              <select name="admin" required class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
++                {administradores.map((adm) => (
++                  <option value={adm.apodo}>{adm.nombre} ({adm.apodo})</option>
++                ))}
++              </select>
++            </label>
++
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Liga</span>
++              <input name="liga" type="text" required placeholder="LaLiga"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++          </div>
++
++          <div class="grid gap-4 sm:grid-cols-2">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Equipo local</span>
++              <input name="equipoLocal" type="text" required placeholder="Real Madrid"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Logo local</span>
++              <select name="logoLocal" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
++                {logosDisponibles.map((l) => (<option value={`/assets/logosEquipos/${l}`}>{l.replace('.png','')}</option>))}
++              </select>
++            </label>
++          </div>
++
++          <div class="grid gap-4 sm:grid-cols-2">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Equipo visitante</span>
++              <input name="equipoVisitante" type="text" required placeholder="Real Betis"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Logo visitante</span>
++              <select name="logoVisitante" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
++                {logosDisponibles.map((l) => (<option value={`/assets/logosEquipos/${l}`}>{l.replace('.png','')}</option>))}
++              </select>
++            </label>
++          </div>
++
++          <div class="grid gap-4 sm:grid-cols-2">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Fecha</span>
++              <input name="fecha" type="date" required
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Hora</span>
++              <input name="hora" type="time" required
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
++            </label>
++          </div>
++
++          <div class="grid gap-4 sm:grid-cols-2">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Pronóstico</span>
++              <input name="pronostico" type="text" required placeholder="Más de 2.5 goles"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Tipo de apuesta</span>
++              <input name="tipoApuesta" type="text" required placeholder="Over/Under"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++          </div>
++
++          <div class="grid gap-4 sm:grid-cols-4">
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Cuota</span>
++              <input name="cuota" type="number" step="0.01" min="1.01" required placeholder="1.85"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Confianza</span>
++              <select name="confianza" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
++                <option>ALTA</option><option selected>MEDIA</option><option>BAJA</option>
++              </select>
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Nivel card</span>
++              <select name="nivel" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none">
++                <option value="destacado">Destacado</option>
++                <option value="secundario" selected>Secundario</option>
++                <option value="terciario">Terciario</option>
++              </select>
++            </label>
++            <label class="block">
++              <span class="mb-1 block text-sm font-medium text-slate-300">Stake (U)</span>
++              <input name="unidades" type="number" step="0.5" min="0.5" value="1"
++                class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-green-500 focus:outline-none" />
++            </label>
++          </div>
++
++          <label class="block">
++            <span class="mb-1 block text-sm font-medium text-slate-300">Comentario / análisis breve</span>
++            <textarea name="comentario" rows="3" placeholder="Ambos equipos llegan con toda su ofensiva…"
++              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none"></textarea>
++          </label>
++
++          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
++            <button type="submit"
++              class="w-full sm:w-auto rounded-xl bg-green-500 px-6 py-3 font-semibold text-black transition hover:bg-green-400 active:bg-green-400">
++              Guardar apuesta
++            </button>
++            <p id="msg-apuesta" class="text-sm text-slate-400" role="status" aria-live="polite"></p>
++          </div>
++        </form>
++      </div>
++
++      <!-- ===== Administradores ===== -->
++      <div class="space-y-8">
++        <div class="rounded-2xl border border-slate-800 bg-[#07111d]/80 p-5 sm:p-6">
++          <h2 class="text-xl font-bold text-white">Administradores</h2>
++          <p class="mt-1 text-sm text-slate-400">
++            Cualquier cantidad de administradores puede registrarse aquí.
++          </p>
++
++          <ul class="mt-4 space-y-3">
++            {administradores.map((adm) => {
++              const picks = apuestas.filter((a) => a.admin === adm.apodo).length;
++              return (
++                <li class="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
++                  <div class="min-w-0">
++                    <p class="truncate font-semibold text-white">{adm.nombre}</p>
++                    <p class="text-xs text-slate-500">{adm.apodo} · {picks} picks</p>
++                  </div>
++                  <span class="shrink-0 rounded-full bg-green-500/15 px-3 py-1 text-xs font-semibold text-green-400">Activo</span>
++                </li>
++              );
++            })}
++          </ul>
++
++          <form id="form-admin" class="mt-5 space-y-3">
++            <input name="nombre" type="text" required placeholder="Nombre completo"
++              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            <input name="apodo" type="text" required placeholder="@apodo"
++              class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:border-green-500 focus:outline-none" />
++            <button type="submit"
++              class="w-full rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-2.5 text-sm font-semibold text-green-400 transition hover:bg-green-500/20 active:bg-green-500/20">
++              + Añadir administrador
++            </button>
++            <p id="msg-admin" class="text-sm text-slate-400" role="status" aria-live="polite"></p>
++          </form>
++        </div>
++      </div>
++    </div>
++
++    <!-- ===== Registro de partidos ===== -->
++    <div class="mt-10 rounded-2xl border border-slate-800 bg-[#07111d]/60">
++      <div class="border-b border-slate-800 p-5 sm:p-6">
++        <h2 class="text-xl font-bold text-white">Registro de partidos</h2>
++        <p class="mt-1 text-sm text-slate-400">
++          Todas las apuestas registradas. Cambia el resultado a ganada/perdida cuando cierre el partido.
++        </p>
++      </div>
++
++      <ul class="divide-y divide-slate-800">
++        {registro.map((a) => (
++          <li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
++            <div class="min-w-0">
++              <p class="font-semibold text-white">
++                {a.equipoLocal} vs {a.equipoVisitante}
++                <span class="ml-2 text-xs font-normal text-slate-500">{a.liga} • {formatearFecha(a.fecha)} • {a.hora}</span>
++              </p>
++              <p class="mt-1 text-sm text-slate-400">
++                {a.pronostico} · cuota <span class="text-green-400 font-semibold">{a.cuota.toFixed(2)}</span> · {a.confianza} · por {a.admin}
++              </p>
++            </div>
++            <span class={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${
++              a.resultado === 'ganada' ? 'border-green-500/30 bg-green-500/15 text-green-400'
++              : a.resultado === 'perdida' ? 'border-red-500/30 bg-red-500/15 text-red-400'
++              : 'border-yellow-500/30 bg-yellow-500/15 text-yellow-400'}`}>
++              {a.resultado === 'ganada' ? '✔ Ganada' : a.resultado === 'perdida' ? '✘ Perdida' : '⏳ Pendiente'}
++            </span>
++          </li>
++        ))}
++      </ul>
++    </div>
++
++  </section>
++
++  <script>
++    // ---- Persistencia local del registro (borrador del admin) ----
++    // En producción estos datos se sincronizan con src/data/predictions.ts
++    // o con una base de datos/CMS. Aquí usamos localStorage para prototipar.
++    const KEY_APUESTAS = 'ai_apuestas_v1';
++    const KEY_ADMINS = 'ai_admins_v1';
++
++    const leer = <T>(key: string, fallback: T): T => {
++      try { return JSON.parse(localStorage.getItem(key) || '') ?? fallback; }
++      catch { return fallback; }
++    };
++
++    const msg = (id: string, texto: string) => {
++      const el = document.getElementById(id);
++      if (el) { el.textContent = texto; setTimeout(() => (el.textContent = ''), 4000); }
++    };
++
++    document.getElementById('form-apuesta')?.addEventListener('submit', (e) => {
++      e.preventDefault();
++      const form = e.target as HTMLFormElement;
++      const data = new FormData(form);
++      const extra = leer<any[]>(KEY_APUESTAS, []);
++      const nueva = {
++        id: Date.now(),
++        admin: data.get('admin'),
++        equipoLocal: data.get('equipoLocal'),
++        logoLocal: data.get('logoLocal'),
++        equipoVisitante: data.get('equipoVisitante'),
++        logoVisitante: data.get('logoVisitante'),
++        liga: data.get('liga'),
++        fecha: data.get('fecha'),
++        hora: data.get('hora'),
++        pronostico: data.get('pronostico'),
++        tipoApuesta: data.get('tipoApuesta'),
++        cuota: Number(data.get('cuota')),
++        confianza: data.get('confianza'),
++        nivel: data.get('nivel'),
++        resultado: 'pendiente',
++        unidades: Number(data.get('unidades') || 1),
++        comentario: data.get('comentario') || '',
++      };
++      localStorage.setItem(KEY_APUESTAS, JSON.stringify([nueva, ...extra]));
++      form.reset();
++      msg('msg-apuesta', '✔ Apuesta guardada como borrador local. Publícala en src/data/predictions.ts.');
++    });
++
++    document.getElementById('form-admin')?.addEventListener('submit', (e) => {
++      e.preventDefault();
++      const form = e.target as HTMLFormElement;
++      const data = new FormData(form);
++      const extra = leer<any[]>(KEY_ADMINS, []);
++      const apodo = String(data.get('apodo') || '');
++      const nuevo = { nombre: String(data.get('nombre') || ''), apodo: apodo.startsWith('@') ? apodo : '@' + apodo };
++      localStorage.setItem(KEY_ADMINS, JSON.stringify([...extra, nuevo]));
++      form.reset();
++      msg('msg-admin', '✔ Administrador añadido como borrador local.');
++    });
++  </script>
++</Layout>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 85058f2..ba2867f 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,14 +1,36 @@
+ ---
+ import Layout from '../layouts/Layout.astro';
+ import Hero from '../components/Hero.astro';
+-import MainCard from '../components/MainCard.astro';
+-import SecondCard from '../components/SecondCard.astro';
+-import TertiaryCard from '../components/TertiaryCard.astro';
++import PicksSection from '../components/PicksSection.astro';
+ import MainLeagues from '../components/MainLeagues.astro';
+ import SectionBlog from '../components/SectionBlog.astro';
+ import FeaturesBar from '../components/FeaturesBar.astro';
+-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
++import {
++  apuestas,
++  administradores,
++  getRendimientoGeneral,
++} from '../data/predictions';
++
++const r = getRendimientoGeneral();
++const fmt = (n: number, dec = 2) => n.toFixed(dec);
++
++// Estadísticas por administrador (basadas en sus apuestas cerradas)
++const adminsStats = administradores.map((adm) => {
++  const suyas = apuestas.filter((a) => a.admin === adm.apodo);
++  const cerradas = suyas.filter((a) => a.resultado !== 'pendiente');
++  const ganadas = cerradas.filter((a) => a.resultado === 'ganada').length;
++  const perdidas = cerradas.filter((a) => a.resultado === 'perdida').length;
++  const apostado = cerradas.reduce((acc, a) => acc + a.unidades, 0);
++  const beneficio =
++    ganadas
++      ? cerradas.filter((a) => a.resultado === 'ganada').reduce((acc, a) => acc + a.unidades * (a.cuota - 1), 0)
++      : 0;
++  const perdidaU = perdidas
++    ? cerradas.filter((a) => a.resultado === 'perdida').reduce((acc, a) => acc + a.unidades, 0)
++    : 0;
++  const roi = apostado ? ((beneficio - perdidaU) / apostado) * 100 : 0;
++  return { apodo: adm.apodo, nombre: adm.nombre, total: suyas.length, ganadas, perdidas, roi };
++});
+ ---
+ 
+ <Layout>
+@@ -17,23 +39,108 @@ import FeaturesBar from '../components/FeaturesBar.astro';
+     <Hero />
+   </section>
+ 
+-  <section class="mb-8" id="picks">
+-    <MainCard />
+-  </section>
++  <!-- Pronósticos registrados por los administradores -->
++  <PicksSection />
+ 
+-  <section class="mb-8">
+-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+-      <SecondCard />
+-      <SecondCard />
++  <!-- Rendimiento general (calculado del historial de /results) -->
++  <section class="mb-10" id="rendimiento">
++    <div class="rounded-2xl border border-slate-800 bg-[#07111d]/90 p-4 sm:p-6 backdrop-blur">
++      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
++        <h2 class="text-xl sm:text-2xl font-bold text-white">Rendimiento general</h2>
++        <a
++          href="/results"
++          class="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-white transition hover:border-green-500 hover:text-green-400 active:border-green-500"
++        >
++          Ver historial completo →
++        </a>
++      </div>
++
++      <!-- Stats -->
++      <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
++        <div class="rounded-2xl border border-slate-800 p-4">
++          <p class="text-sm text-slate-400">ROI</p>
++          <p class={`mt-2 text-xl sm:text-2xl lg:text-3xl font-bold ${r.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
++            {r.roi >= 0 ? '+' : ''}{fmt(r.roi)}%
++          </p>
++        </div>
++
++        <div class="rounded-2xl border border-slate-800 p-4">
++          <p class="text-sm text-slate-400">Win Rate</p>
++          <p class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-green-500">
++            {fmt(r.winRate, 1)}%
++          </p>
++        </div>
++
++        <div class="rounded-2xl border border-slate-800 p-4">
++          <p class="text-sm text-slate-400">Pronósticos</p>
++          <p class="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-white">
++            {r.totalPronosticos}
++          </p>
++          <p class="mt-1 text-xs text-slate-500">
++            {r.cerradas} cerrados · {r.pendientes} pendientes
++          </p>
++        </div>
++
++        <div class="rounded-2xl border border-slate-800 p-4">
++          <p class="text-sm text-slate-400">Beneficio</p>
++          <p class={`mt-2 text-xl sm:text-2xl lg:text-3xl font-bold ${r.beneficio >= 0 ? 'text-green-500' : 'text-red-500'}`}>
++            {r.beneficio >= 0 ? '+' : ''}{fmt(r.beneficio, 1)} U
++          </p>
++        </div>
++      </div>
++
++      <!-- Desglose + resumen por admin -->
++      <div class="mt-6 grid gap-4 lg:grid-cols-2">
++
++        <div class="rounded-2xl border border-slate-800 p-5">
++          <h3 class="mb-4 text-lg font-semibold text-white">Ganadas vs Perdidas</h3>
++
++          <div class="flex-1">
++            <div class="flex justify-between text-sm mb-1">
++              <span class="text-green-500 font-semibold">Ganadas</span>
++              <span class="text-slate-300">{r.ganadas}</span>
++            </div>
++            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
++              <div
++                class="h-full rounded-full bg-green-500"
++                style={`width: ${r.cerradas ? (r.ganadas / r.cerradas) * 100 : 0}%`}
++              ></div>
++            </div>
++          </div>
++
++          <div class="mt-4 flex-1">
++            <div class="flex justify-between text-sm mb-1">
++              <span class="text-red-500 font-semibold">Perdidas</span>
++              <span class="text-slate-300">{r.perdidas}</span>
++            </div>
++            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800">
++              <div
++                class="h-full rounded-full bg-red-500"
++                style={`width: ${r.cerradas ? (r.perdidas / r.cerradas) * 100 : 0}%`}
++              ></div>
++            </div>
++          </div>
++        </div>
++
++        <div class="rounded-2xl border border-slate-800 p-5">
++          <h3 class="mb-4 text-lg font-semibold text-white">Resumen por administrador</h3>
++          <ul class="space-y-3 text-sm">
++            {adminsStats.map((s) => (
++              <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
++                <span class="text-slate-300 font-medium">{s.apodo}</span>
++                <span class="text-slate-400">{s.ganadas}G / {s.perdidas}P · {s.total} picks</span>
++                <span class={`font-bold ${s.roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
++                  {s.roi >= 0 ? '+' : ''}{s.roi.toFixed(1)}% ROI
++                </span>
++              </li>
++            ))}
++          </ul>
++        </div>
++
++      </div>
+     </div>
+   </section>
+ 
+- <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 pb-5">
+-    <TertiaryCard />
+-    <TertiaryCard />
+-    <TertiaryCard />
+-  </div>
+-
+   <MainLeagues />
+   <SectionBlog />
+   <FeaturesBar />
+diff --git a/src/pages/results.astro b/src/pages/results.astro
+index e69de29..a9c54ef 100644
+--- a/src/pages/results.astro
++++ b/src/pages/results.astro
+@@ -0,0 +1,149 @@
++---
++import Layout from '../layouts/Layout.astro';
++import { getHistorial, getRendimientoGeneral, formatearFecha } from '../data/predictions';
++
++const historial = getHistorial();
++const r = getRendimientoGeneral();
++
++const badgeResultado: Record<string, string> = {
++  ganada: 'bg-green-500/15 text-green-400 border-green-500/30',
++  perdida: 'bg-red-500/15 text-red-400 border-red-500/30',
++  pendiente: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
++};
++const textoResultado: Record<string, string> = {
++  ganada: '✔ Ganada',
++  perdida: '✘ Perdida',
++  pendiente: '⏳ Pendiente',
++};
++---
++
++<Layout>
++  <section class="py-8 sm:py-12">
++
++    <!-- Encabezado -->
++    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
++      <div>
++        <h1 class="text-[clamp(1.75rem,5vw,2.5rem)] font-bold text-white">
++          Historial de pronósticos
++        </h1>
++        <p class="mt-2 max-w-xl text-sm sm:text-base text-slate-400">
++          Registro completo de las apuestas deportivas publicadas por nuestros
++          administradores. Transparencia total: ganadas, perdidas y pendientes.
++        </p>
++      </div>
++
++      <a
++        href="/#rendimiento"
++        class="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-white transition hover:border-green-500 hover:text-green-400 active:border-green-500"
++      >
++        Volver al rendimiento general
++      </a>
++    </div>
++
++    <!-- Resumen rápido -->
++    <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Totales</p>
++        <p class="mt-1 text-2xl font-bold text-white">{r.cerradas + r.pendientes}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Ganadas</p>
++        <p class="mt-1 text-2xl font-bold text-green-500">{r.ganadas}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Perdidas</p>
++        <p class="mt-1 text-2xl font-bold text-red-500">{r.perdidas}</p>
++      </div>
++      <div class="rounded-2xl border border-slate-800 bg-[#07111d]/60 p-4 text-center">
++        <p class="text-xs uppercase tracking-wide text-slate-500">Win Rate</p>
++        <p class="mt-1 text-2xl font-bold text-white">{r.winRate.toFixed(1)}%</p>
++      </div>
++    </div>
++
++    <!-- Tabla (desktop) / Cards (móvil) -->
++    <div class="overflow-hidden rounded-2xl border border-slate-800 bg-[#07111d]/60">
++
++      <!-- Vista tabla: md en adelante -->
++      <div class="hidden md:block overflow-x-auto">
++        <table class="w-full text-left text-sm">
++          <thead>
++            <tr class="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-500">
++              <th class="px-4 py-3 font-semibold">Fecha</th>
++              <th class="px-4 py-3 font-semibold">Partido</th>
++              <th class="px-4 py-3 font-semibold">Liga</th>
++              <th class="px-4 py-3 font-semibold">Pronóstico</th>
++              <th class="px-4 py-3 font-semibold text-center">Cuota</th>
++              <th class="px-4 py-3 font-semibold text-center">Confianza</th>
++              <th class="px-4 py-3 font-semibold">Admin</th>
++              <th class="px-4 py-3 font-semibold text-center">Resultado</th>
++            </tr>
++          </thead>
++          <tbody>
++            {historial.map((a) => (
++              <tr class="border-b border-slate-800/60 last:border-0 hover:bg-white/[0.03] transition">
++                <td class="whitespace-nowrap px-4 py-3 text-slate-400">
++                  {formatearFecha(a.fecha)} · {a.hora}
++                </td>
++                <td class="px-4 py-3">
++                  <div class="flex items-center gap-2">
++                    <img src={a.logoLocal} alt="" class="h-6 w-6 object-contain" />
++                    <span class="text-white font-medium">{a.equipoLocal} vs {a.equipoVisitante}</span>
++                    <img src={a.logoVisitante} alt="" class="h-6 w-6 object-contain" />
++                  </div>
++                </td>
++                <td class="whitespace-nowrap px-4 py-3 text-slate-400">{a.liga}</td>
++                <td class="px-4 py-3 text-white">{a.pronostico}</td>
++                <td class="px-4 py-3 text-center font-semibold text-green-400">{a.cuota.toFixed(2)}</td>
++                <td class="px-4 py-3 text-center text-slate-300">{a.confianza}</td>
++                <td class="whitespace-nowrap px-4 py-3 text-slate-400">{a.admin}</td>
++                <td class="px-4 py-3 text-center">
++                  <span class={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${badgeResultado[a.resultado]}`}>
++                    {textoResultado[a.resultado]}
++                  </span>
++                </td>
++              </tr>
++            ))}
++          </tbody>
++        </table>
++      </div>
++
++      <!-- Vista cards: móvil -->
++      <ul class="divide-y divide-slate-800 md:hidden">
++        {historial.map((a) => (
++          <li class="p-4">
++            <div class="flex items-start justify-between gap-3">
++              <div class="min-w-0">
++                <div class="flex items-center gap-2">
++                  <img src={a.logoLocal} alt={a.equipoLocal} class="h-8 w-8 object-contain" />
++                  <img src={a.logoVisitante} alt={a.equipoVisitante} class="h-8 w-8 object-contain" />
++                  <span class="truncate font-semibold text-white">
++                    {a.equipoLocal} vs {a.equipoVisitante}
++                  </span>
++                </div>
++                <p class="mt-1 text-xs text-slate-500">
++                  {a.liga} • {formatearFecha(a.fecha)} • {a.hora} • por {a.admin}
++                </p>
++              </div>
++              <span class={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold ${badgeResultado[a.resultado]}`}>
++                {textoResultado[a.resultado]}
++              </span>
++            </div>
++
++            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
++              <span class="text-white font-medium">{a.pronostico}</span>
++              <span class="text-green-400 font-bold">Cuota {a.cuota.toFixed(2)}</span>
++              <span class="text-slate-400">Confianza: {a.confianza}</span>
++              <span class="text-slate-500">Stake: {a.unidades} U</span>
++            </div>
++          </li>
++        ))}
++      </ul>
++
++    </div>
++
++    <p class="mt-6 text-center text-xs text-slate-500">
++      ¿Eres administrador? Registra nuevas apuestas en el
++      <a href="/admin" class="text-green-500 hover:text-green-400">panel de administración</a>.
++    </p>
++  </section>
++</Layout>
+-- 
+2.39.5
+
